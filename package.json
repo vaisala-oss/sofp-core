@@ -11,13 +11,16 @@
 		"type": "git",
 		"url": "git@github.com:spatineo/sofp-core.git"
 	},
-	"contributors": [{
-		"name": "Sampo Savolainen",
-		"email": "sampo.savolainen@spatineo.com"
-	}],
+	"contributors": [
+		{
+			"name": "Sampo Savolainen",
+			"email": "sampo.savolainen@spatineo.com"
+		}
+	],
 	"dependencies": {
-
+		"express": "~4.16.3",
+		"exegesis": "~1.0.5",
+		"exegesis-express": "~1.0.0"
 	},
-	"devDependencies": {
-	}
+	"devDependencies": {}
 }
