@@ -3,6 +3,43 @@ info:
   title: My API
   version: 1.0.0
 paths:
+
+  '/foo':
+    get:
+      summary: Greets the user
+      operationId: getFoo
+      x-exegesis-controller: fooController
+      parameters:
+        - description: Specify bar.
+          name: bar
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Stuff done.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  foo:
+                    type: string
+        default:
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+
   '/greet':
     get:
       summary: Greets the user
