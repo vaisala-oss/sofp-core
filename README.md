@@ -12,4 +12,6 @@ To start the local image (removing the container when stopped):
 
   docker run --rm -p 127.0.0.1:8080:3000/tcp spatineo/sofp-core
 
+## CI
 
+Let's try travis!
