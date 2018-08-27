@@ -8,7 +8,8 @@
 		"node": "^6.14.0"
 	},
 	"scripts": {
-		"start": "node_modules/nodemon/bin/nodemon.js -w api/ -w controllers/ -w server/ -e js,yaml server/app.js"
+		"start": "node_modules/nodemon/bin/nodemon.js -w api/ -w controllers/ -w server/ -e js,yaml server/app.js",
+		"test": "jest"
 	},
 	"repository": {
 		"type": "git",
@@ -26,6 +27,7 @@
 		"exegesis-express": "~1.0.0"
 	},
 	"devDependencies": {
-		"nodemon": "~1.18.3"
+		"nodemon": "~1.18.3",
+		"jest": "~23.5.0"
 	}
 }
