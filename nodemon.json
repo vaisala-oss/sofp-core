@@ -1,0 +1,7 @@
+{
+  "watch": [
+    "dist/",
+    "api/"
+  ],
+  "ext": "ts js json"
+}

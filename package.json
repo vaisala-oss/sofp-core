@@ -8,8 +8,8 @@
 		"node": "^6.14.0"
 	},
 	"scripts": {
-		"start": "nodemon -w api/ -w controllers/ -w server/ -e js,yaml dist/server/app.js",
-		"tsc": "tsc",
+		"start": "tsc -w & nodemon dist/server/app.js",
+		"build": "tsc",
 		"test": "jest"
 	},
 	"repository": {
