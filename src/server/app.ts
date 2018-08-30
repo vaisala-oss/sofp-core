@@ -15,7 +15,7 @@ async function createServer() {
     // This creates an exgesis middleware, which can be used with express,
     // connect, or even just by itself.
     const exegesisMiddleware = await exegesisExpress.middleware(
-        path.resolve(__dirname, '../api/hello-world.yaml'),
+        path.resolve(__dirname, '../../api/hello-world.yaml'),
         options
     );
 
