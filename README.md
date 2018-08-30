@@ -2,7 +2,7 @@
 
 This is a proof of concept server to test using the WFS 3.0 specification for distributing meteorological data using an encoding that will be calle simple observation features. The core project only serves as a proxy to a backend implementation that provides access to data. Deployment strategy is dockerized so that the sofp-core will produce a docker image that a backend implementation may build on top of.
 
-[![Build Status](https://semaphoreci.com/api/v1/spatineo/sofp-core/branches/feature-exegesis/badge.svg)](https://semaphoreci.com/spatineo/sofp-core)
+[![Build Status](https://semaphoreci.com/api/v1/spatineo/sofp-core/branches/master/badge.svg)](https://semaphoreci.com/spatineo/sofp-core)
 
 ## Building a docker image of the sofp-core
 
