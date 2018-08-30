@@ -23,4 +23,4 @@ COPY . .
 RUN npm test
 
 EXPOSE 3000
-CMD [ "npm", "start" ]
+CMD [ "node", "dist/server/app.js" ]
