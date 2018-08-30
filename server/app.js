@@ -7,6 +7,7 @@ async function createServer() {
     // See https://github.com/exegesis-js/exegesis/blob/master/docs/Options.md
     const options = {
         controllers: path.resolve(__dirname, '../controllers'),
+        controllersPattern: '**/*Controller.@(js|ts)',
         allowMissingControllers: false
     };
 
