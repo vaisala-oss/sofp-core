@@ -9,18 +9,16 @@ RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 RUN yum -y install nodejs
 
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
 COPY package*.json ./
 
 RUN npm install 
 # We could add --only=production, but we want to run tests
 
-# Bundle app source
+# Copy application, build & test
 COPY . .
-
-# Ensure tests run fine before packaging
+RUN npm run build
 RUN npm test
 
+# Done!
 EXPOSE 3000
 CMD [ "node", "dist/server/app.js" ]
