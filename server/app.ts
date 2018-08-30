@@ -1,7 +1,8 @@
-const express = require('express');
-const exegesisExpress = require('exegesis-express');
-const http = require('http');
-const path = require('path');
+import * as express from 'express';
+import * as exegesisExpress from 'exegesis-express';
+import * as http from 'http';
+import * as path from 'path';
+
 
 async function createServer() {
     // See https://github.com/exegesis-js/exegesis/blob/master/docs/Options.md
@@ -38,11 +39,12 @@ async function createServer() {
     return server;
 }
 
+
 createServer()
 .then(server => {
     server.listen(3000);
-    console.log("Listening on port 3000");
-    console.log("Try visiting http://localhost:3000/greet?name=Jason");
+    console.log('Listening on port 3000');
+    console.log('Try visiting http://localhost:3000/greet?name=Jason');
 })
 .catch(err => {
     console.error(err.stack);

@@ -28,6 +28,9 @@
 	},
 	"devDependencies": {
 		"nodemon": "~1.18.3",
-		"jest": "~23.5.0"
+		"jest": "~23.5.0",
+		"typescript": "~2.9.2",
+		"@types/node": "~10.9.3",
+		"ts-node": "~7.0.1"
 	}
 }
