@@ -8,6 +8,11 @@ WORKDIR /usr/src/app
 RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
 RUN yum -y install nodejs
 
+# Setup user
+RUN useradd -r -u 999 -g users sofp-user -d /usr/src/app
+RUN chgrp users /usr/src/app
+RUN chmod g+rx /usr/src/app
+
 # Install app dependencies
 COPY package*.json ./
 
@@ -18,6 +23,8 @@ RUN npm install
 COPY . .
 RUN npm run build
 RUN npm test
+
+USER sofp-user
 
 # Done!
 EXPOSE 3000
