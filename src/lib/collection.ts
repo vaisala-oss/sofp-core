@@ -1,15 +1,13 @@
-import {ItemCursor} from './item_cursor';
-import {Link} from './link';
-import {Query} from './query';
+import {FeatureCursor, Link, Query} from 'lib/';
 
 export interface Collection {
     // https://raw.githubusercontent.com/opengeospatial/WFS_FES/master/core/openapi/schemas/collectionInfo.yaml
-    getName() : string;
-    getTitle() : string;
-    getDescription() : string;
-    getLinks() : Link[];
-    getExtent() : string;
+    name : string;
+    title : string;
+    description : string;
+    links : Link[];
+    extent : string;
     // CRS will be decided by the server
 
-    executeQuery(query : Query) : ItemCursor;
+    executeQuery(query : Query) : FeatureCursor;
 };

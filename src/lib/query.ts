@@ -1,9 +1,5 @@
-import {Filter} from './filter';
+import {Filter} from 'lib/';
 
 export class Query {
-    private filters : Filter[];
-
-    getFilters() : Filter[] {
-        return this.filters;
-    };
+    filters : Filter[] = [];
 };

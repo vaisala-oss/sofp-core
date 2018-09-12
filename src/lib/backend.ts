@@ -1,7 +1,6 @@
-import {Collection} from './collection';
-import {Link} from './link';
+import {Collection, Link} from 'lib/';
 
-export interface Backend {
-    getCollections() : Collection[];
-    getLinks() : Link[];
+export class Backend {
+    collections : Collection[] = [];
+    links : Link[] = [];
 };

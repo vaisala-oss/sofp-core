@@ -1,8 +1,9 @@
-export {Backend} from './backend';
-export {Collection} from './collection';
-export {Feature} from './feature';
-export {FeatureCursor} from './feature_cursor';
-export {Filter} from './filter';
-export {Link} from './link';
-export {Query} from './query';
+export * from './backend';
+export * from './collection';
+export * from './feature';
+export * from './feature_cursor';
+export * from './filter';
+export * from './link';
+export * from './query';
+
 
