@@ -67,7 +67,8 @@ test('Execute query targets correct collection', () => {
 
     let fakeCursor = {
         hasNext: () => false,
-        next: () => null
+        next: () => null,
+        remainingFilter: []
     };
 
     let mockBackend = new Backend();
@@ -81,5 +82,79 @@ test('Execute query targets correct collection', () => {
     mockBackend.collections.push(collection);
     server.backends.push(mockBackend);
 
-    expect(server.executeQuery({ featureName: 'Foo', filters: [] })).toBe(fakeCursor);
+    expect(server.executeQuery({ featureName: 'Foo', filters: [] })).toBeTruthy();
+});
+
+test('Execute query applies remaining filters - case accept', () => {
+    let server = new Server();
+
+    let fakeFeatures = [{
+        properties: {
+            name: 'foo'
+        },
+        geometry: null
+    }];
+
+    let firstFakeFeature = fakeFeatures[0];
+
+    let fakeCursor = {
+        hasNext: () => (fakeFeatures.length > 0),
+        next: () => (fakeFeatures.splice(0,1)[0]),
+        remainingFilter: [{
+            accept: (f) => (f.properties.name === 'foo')
+        }]
+    };
+
+    let mockBackend = new Backend();
+    const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
+        name: name,
+        executeQuery: (query : Query) => fakeCursor
+    }));
+
+    let collection = new MockCollectionWithQuery('Foo');
+
+    mockBackend.collections.push(collection);
+    server.backends.push(mockBackend);
+
+    let featureCursor = server.executeQuery({ featureName: 'Foo', filters: [] });
+
+    expect(featureCursor.hasNext()).toBe(true);
+    expect(featureCursor.next()).toBe(firstFakeFeature);
+    expect(featureCursor.hasNext()).toBe(false);
+});
+
+test('Execute query applies remaining filters - case not accept', () => {
+    let server = new Server();
+
+    let fakeFeatures = [{
+        properties: {
+            name: 'foo'
+        },
+        geometry: null
+    }];
+
+    let firstFakeFeature = fakeFeatures[0];
+
+    let fakeCursor = {
+        hasNext: () => (fakeFeatures.length > 0),
+        next: () => (fakeFeatures.splice(0,1)[0]),
+        remainingFilter: [{
+            accept: (f) => (f.properties.name === 'bar') // firstFakeFeature name is 'foo', should not accept!
+        }]
+    };
+
+    let mockBackend = new Backend();
+    const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
+        name: name,
+        executeQuery: (query : Query) => fakeCursor
+    }));
+
+    let collection = new MockCollectionWithQuery('Foo');
+
+    mockBackend.collections.push(collection);
+    server.backends.push(mockBackend);
+
+    let featureCursor = server.executeQuery({ featureName: 'Foo', filters: [] });
+
+    expect(featureCursor.hasNext()).toBe(false);
 });

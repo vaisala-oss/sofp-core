@@ -32,7 +32,38 @@ export class Server {
     executeQuery(query : Query) : FeatureCursor {
         let collection = this.getCollection(query.featureName);
 
-        return collection.executeQuery(query);
+        let cursor = collection.executeQuery(query);
+
+        function getNextFiltered() {
+            let ret = null;
+            do {
+                // Original cursor is empty => return
+                if (!cursor.hasNext()) return null;
+
+                // Get next feature
+                ret = cursor.next();
+
+                // Test with filters, if not accepted => null
+                if (_.find(cursor.remainingFilter, function(filter) { return !filter.accept(ret); })) {
+                    ret = null;
+                }
+
+            } while(ret === null || ret === undefined);
+
+            return ret;
+        }
+
+        let nextFeature = getNextFiltered();
+
+        return {
+            hasNext: () => (nextFeature !== null && nextFeature !== undefined),
+            next: () => {
+                let ret = nextFeature;
+                nextFeature = getNextFiltered();
+                return ret;
+            },
+            remainingFilter: []
+        };
     };
 };
 
