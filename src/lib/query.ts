@@ -1,5 +1,6 @@
 import {Filter} from 'lib/';
 
-export class Query {
-    filters : Filter[] = [];
+export interface Query {
+    featureName : string;
+    filters : Filter[];
 };
