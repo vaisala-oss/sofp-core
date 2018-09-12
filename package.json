@@ -10,7 +10,7 @@
 	"scripts": {
 		"start": "tsc -w & nodemon dist/server/app.js",
 		"build": "tsc",
-		"test": "jest"
+		"test": "jest dist/**/*.test.js"
 	},
 	"repository": {
 		"type": "git",
@@ -29,7 +29,7 @@
 	},
 	"devDependencies": {
 		"nodemon": "~1.18.3",
-		"jest": "~23.5.0",
+		"jest": "~23.6.0",
 		"typescript": "~2.9.2",
 		"@types/node": "~10.9.3",
 		"ts-node": "~7.0.1",
