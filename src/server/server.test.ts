@@ -5,7 +5,9 @@ const MockCollection = jest.fn<Collection>((name : string) => ({
     name: name
 }));
 
-const MockBackend = jest.fn<Backend>();
+const MockBackend = jest.fn<Backend>(() => ({
+    collections: []
+}));
 
 test('Single-backend server returns single collection', () => {
     let server = new Server();
