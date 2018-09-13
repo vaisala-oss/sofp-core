@@ -1,7 +1,7 @@
 import {Server} from './server';
+import {Link, Collection} from '../lib';
 
-import {Link} from '../lib';
-
+import * as _ from 'lodash';
 import * as express from 'express';
 
 /**
@@ -10,7 +10,8 @@ import * as express from 'express';
  **/
 
 export interface APIResponse {
-    links: Link[]
+    links?: Link[],
+    collections?: Collection[]
 };
 
 export interface RequestParameters {
@@ -28,7 +29,7 @@ export class API {
     server : Server;
 
     title : string;
-    contextPath : string;   
+    contextPath : string;
 
     constructor(server : Server, params : APIParameters) {
         this.server = server;
@@ -44,20 +45,30 @@ export class API {
     }
 
     connectExpress(app: express) : void {
-        app.get(this.contextPath, (req, res) => {
-            let baseUrl = req.protocol + '://' + req.headers.host + this.contextPath;
-            while (baseUrl.charAt(baseUrl.length-1) === '/') {
-                baseUrl = baseUrl.substr(0, baseUrl.length-1);
+        let getBaseUrl = (req: express.req) : string => {
+            let ret = req.protocol + '://' + req.headers.host + this.contextPath;
+            while (ret.charAt(ret.length-1) === '/') {
+                ret = ret.substr(0, ret.length-1);
             }
-            
-            let response = this.getLandingPage({ baseUrl: baseUrl });
+            return ret;
+        }
+        app.get(this.contextPath, (req, res) => {
+            let response = this.getApiLandingPage({ baseUrl: getBaseUrl(req) });
+            res.json(response);
+        });
+
+        app.get(this.contextPath + 'collections', (req, res) => {
+            let response = this.getFeatureCollectionsMetadata({ baseUrl: getBaseUrl(req) });
             res.json(response);
         });
     }
 
-
-    // https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_api_landing_page
-    getLandingPage(params : RequestParameters) : APIResponse {
+    /**
+     * Return object following the WFS 3.0.0 draft 1 specification for api landing page
+     *
+     * @link https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_api_landing_page
+     **/
+    getApiLandingPage(params : RequestParameters) : APIResponse {
         return {
             links: [{
                 href: params.baseUrl + '/',
@@ -83,5 +94,30 @@ export class API {
         };
     }
 
+    /**
+     * Return object following the WFS 3.0.0 draft 1 specification for feature collections metadata
+     * @link https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_feature_collections_metadata
+     */ 
+    getFeatureCollectionsMetadata(params : RequestParameters) : APIResponse {
+        let ret : APIResponse = {
+            links: [{
+                href: params.baseUrl + '/collections',
+                rel: 'self',
+                type: 'application/json',
+                title: 'Metadata about the feature collections'
+            }],
+            collections: _.cloneDeep(this.server.getCollections())
+        };
+
+        _.each(ret.collections, (collection) => {
+            collection.links.unshift({
+                href: params.baseUrl + '/collections/'+collection.name,
+                rel: 'item',
+                type: 'application/json'
+            });
+        });
+
+        return ret;
+    }
 };
 

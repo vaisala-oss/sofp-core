@@ -12,7 +12,8 @@ import * as http from 'http';
 const serverPort = 3000;
 
 let server = new Server();
-// TODO: add backends
+
+// TODO: these need to be dynamically loaded in a manner that allows easy packaging and deployment of core + backend(s)
 import {MockBackend} from '../mock/mock_backend';
 server.backends.push(MockBackend);
 
