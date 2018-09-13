@@ -1,7 +1,9 @@
 import {Backend, Collection, FeatureCursor, Filter, Query} from '../lib';
 import * as _ from 'lodash';
 
-
+/**
+ * The Server contains links to backends and functions to access data (run queries)
+ **/
 export class Server {
     backends : Backend[] = [];
 
