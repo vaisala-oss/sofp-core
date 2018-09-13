@@ -5,10 +5,12 @@ const MockCollection = jest.fn<Collection>((name : string) => ({
     name: name
 }));
 
+const MockBackend = jest.fn<Backend>();
+
 test('Single-backend server returns single collection', () => {
     let server = new Server();
 
-    let mockBackend = new Backend();
+    let mockBackend = new MockBackend();
     const mockCollection = new MockCollection('Foo');
     mockBackend.collections.push(mockCollection);
 
@@ -23,12 +25,12 @@ test('Single-backend server returns single collection', () => {
 test('Multi-backend server returns all collections', () => {
     let server = new Server();
 
-    let mockBackend1 = new Backend();
+    let mockBackend1 = new MockBackend();
     mockBackend1.collections.push(new MockCollection('Foo1'));
     mockBackend1.collections.push(new MockCollection('Foo2'));
     server.backends.push(mockBackend1);
 
-    let mockBackend2 = new Backend();
+    let mockBackend2 = new MockBackend();
     mockBackend2.collections.push(new MockCollection('Bar'));
     server.backends.push(mockBackend2);
 
@@ -43,14 +45,14 @@ test('Multi-backend server returns all collections', () => {
 test('Find collection by name', () => {
     let server = new Server();
 
-    let mockBackend1 = new Backend();
+    let mockBackend1 = new MockBackend();
     let foo1 = new MockCollection('Foo1');
     let foo2 = new MockCollection('Foo2');
     mockBackend1.collections.push(foo1);
     mockBackend1.collections.push(foo2);
     server.backends.push(mockBackend1);
 
-    let mockBackend2 = new Backend();
+    let mockBackend2 = new MockBackend();
     let bar = new MockCollection('Bar');
     mockBackend2.collections.push(bar);
     server.backends.push(mockBackend2);
@@ -71,7 +73,7 @@ test('Execute query targets correct collection', () => {
         remainingFilter: []
     };
 
-    let mockBackend = new Backend();
+    let mockBackend = new MockBackend();
     const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
         name: name,
         executeQuery: (query : Query) => fakeCursor
@@ -105,7 +107,7 @@ test('Execute query applies remaining filters - case accept', () => {
         }]
     };
 
-    let mockBackend = new Backend();
+    let mockBackend = new MockBackend();
     const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
         name: name,
         executeQuery: (query : Query) => fakeCursor
@@ -143,7 +145,7 @@ test('Execute query applies remaining filters - case not accept', () => {
         }]
     };
 
-    let mockBackend = new Backend();
+    let mockBackend = new MockBackend();
     const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
         name: name,
         executeQuery: (query : Query) => fakeCursor
