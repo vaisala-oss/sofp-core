@@ -10,7 +10,8 @@
 	"scripts": {
 		"start": "tsc -w & nodemon dist/server/app.js",
 		"build": "tsc",
-		"test": "jest dist/**/*.test.js"
+		"test": "jest dist/**/*.test.js",
+		"typedoc": "typedoc --out typedoc/ --mode modules --exclude **/*.test.*,**/mock/**"
 	},
 	"repository": {
 		"type": "git",
@@ -34,6 +35,7 @@
 		"@types/node": "~10.9.3",
 		"ts-node": "~7.0.1",
 		"@types/jest": "~23.3.1",
-		"ts-jest": "~23.1.4"
+		"ts-jest": "~23.1.4",
+		"typedoc": "~0.12.0"
 	}
 }
