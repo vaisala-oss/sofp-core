@@ -1,6 +1,8 @@
 import {Server} from './server';
 import {API} from './api';
 
+import * as _ from 'lodash';
+
 import * as express from 'express';
 import * as http from 'http';
 
@@ -8,6 +10,8 @@ const serverPort = 3000;
 
 let server = new Server();
 // TODO: add backends
+import {MockBackend} from '../mock/mock_backend';
+server.backends.push(MockBackend);
 
 let api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: '/sofp' });
 
@@ -29,4 +33,11 @@ const httpServer = http.createServer(app);
 httpServer.listen(serverPort);
 
 console.log('Listening on port '+serverPort);
+console.log('Active backends ('+server.backends.length+') and their collections:');
+_.each(server.backends, (backend) => {
+    console.log('  - '+backend.name);
+    _.each(backend.collections, (collection) => {
+        console.log('     |- '+collection.name);
+    });
+});
 console.log('Try visiting http://localhost:'+serverPort+api.contextPath);

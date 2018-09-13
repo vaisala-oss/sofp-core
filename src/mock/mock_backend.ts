@@ -1,6 +1,6 @@
 import {Backend, Collection, Link, Query, FeatureCursor, Feature} from '../lib/';
 
-let MockBackend = new Backend();
+let MockBackend = new Backend('MockBackend');
 
 class FooCollection implements Collection {
     name : string = 'FOO';
