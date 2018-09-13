@@ -1,3 +1,6 @@
+// Use source maps in the app, so that node reports typescript source code files & line numbers
+require('source-map-support').install();
+
 import {Server} from './server';
 import {API} from './api';
 
@@ -26,7 +29,8 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    res.status(500).json({message: 'Internal error: ${err.message}'});
+    console.error(err);
+    res.status(500).json({message: 'Internal error: '+err.message});
 });
 
 const httpServer = http.createServer(app);
