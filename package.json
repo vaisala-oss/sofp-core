@@ -11,7 +11,7 @@
 		"start": "tsc -w & nodemon dist/server/app.js",
 		"build": "tsc",
 		"test": "jest dist/**/*.test.js",
-		"typedoc": "typedoc --out typedoc/ --mode modules --exclude **/*.test.*,**/mock/**"
+		"typedoc": "typedoc --out typedoc/ --mode file --exclude **/*.test.*,**/mock/**"
 	},
 	"repository": {
 		"type": "git",
