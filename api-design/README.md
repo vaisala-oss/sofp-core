@@ -119,7 +119,7 @@ Example response:
           "href": "http://data.example.org/datasets/observation/airQuality",
           "rel": "index",
           "type": "application/json",
-          "title": "WFS3 landing page of theaitr quality observation service"
+          "title": "WFS3 landing page of the air quality observation service"
         },
         {
           "href": "http://catalog.fmi.fi/geonetwork/srv/api/records/cf1b68b2-78d8-481c-9c2c-2b950214d477/formatters/xml",
