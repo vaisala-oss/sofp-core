@@ -61,6 +61,11 @@ export class API {
             let response = this.getFeatureCollectionsMetadata({ baseUrl: getBaseUrl(req) });
             res.json(response);
         });
+
+        app.get(this.contextPath + 'conformance', (req, res) => {
+            let response = this.getConformancePage({ baseUrl: getBaseUrl(req) });
+            res.json(response);
+        });
     }
 
     /**
@@ -118,6 +123,16 @@ export class API {
         });
 
         return ret;
+    }
+
+    getConformancePage(params : RequestParameters) : object {
+        // TODO: this is still a lie, but we're getting there..
+        return {
+            conformsTo: [
+                'http://www.opengis.net/spec/wfs-1/3.0/req/core',
+                'http://www.opengis.net/spec/wfs-1/3.0/req/oas30',
+                'http://www.opengis.net/spec/wfs-1/3.0/req/geojson' ]
+        };
     }
 };
 
