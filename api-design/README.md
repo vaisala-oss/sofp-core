@@ -2,6 +2,8 @@
 
 ## Root level: Dataset discovery API (non-WFS3)
 
+The functionality of the dataset discovery API can also be implemented using a catalog service like CSW.
+
 **Request:** ```GET /```
 
 Landing page for the entire multi-endpoint service (non-WFS3).
@@ -51,16 +53,16 @@ Example response:
   ],
   "datasets": [
     {
-      "name": "forecast/weather",
+      "name": "weather/forecast",
       "title": "Weather forecast data",
-      "description": "Most recent weather forecast based in numerical weather model and forecaster guidance provided by the Finnish Meteorological Institute",
+      "description": "Weather Most recent weather forecast based in numerical weather model and forecaster guidance provided by the Finnish Meteorological Institute",
       "extent": {
         "spatial": [ 7.01, 50.63, 7.22, 50.78 ],
         "temporal": [ "2010-02-15T12:34:56Z", "2018-03-18T12:11:00Z" ]
       },
       "links": [
         {
-          "href": "http://data.example.org/datasets/forecast/weather",
+          "href": "http://data.example.org/datasets/weather/forecast",
           "rel": "index",
           "type": "application/json",
           "title": "WFS3 landing page of the weather forecast service"
@@ -72,7 +74,7 @@ Example response:
           "title": "ISO 19139 metadata for the weather forecast dataset series"
         },
         {
-          "href": "http://data.example.org/datasets/forecast/weather/api",
+          "href": "http://data.example.org/datasets/weather/forecast/api",
           "rel": "service",
           "type": "application/openapi+json;version=3.0",
           "title": "WFS3 API definition of the weather forecast service"
@@ -80,7 +82,7 @@ Example response:
       ]
     },
     {
-      "name": "observation/weather",
+      "name": "weather/observation",
       "title": "Weather observations",
       "description": "Official weather observation data from the Finnish weather observation station network. Provided by the Finnish Meteorological Institute",
       "extent": {
@@ -88,7 +90,7 @@ Example response:
       },
       "links": [
         {
-          "href": "http://data.example.org/datasets/observation/weather",
+          "href": "http://data.example.org/datasets/weather/observation",
           "rel": "index",
           "type": "application/json",
           "title": "WFS3 landing page of the weather observation service"
@@ -100,7 +102,7 @@ Example response:
           "title": "ISO 19139 metadata for the weather observations dataset series"
         },
         {
-          "href": "http://data.example.org/datasets/observation/weather/api",
+          "href": "http://data.example.org/datasets/weather/observation/api",
           "rel": "service",
           "type": "application/openapi+json;version=3.0",
           "title": "WFS3 API definition of the weather observations service"
@@ -116,7 +118,7 @@ Example response:
       },
       "links": [
         {
-          "href": "http://data.example.org/datasets/observation/airQuality",
+          "href": "http://data.example.org/datasets/airQuality/observation",
           "rel": "index",
           "type": "application/json",
           "title": "WFS3 landing page of the air quality observation service"
@@ -128,7 +130,7 @@ Example response:
           "title": "ISO 19139 metadata for the air quality observations dataset series"
         },
         {
-          "href": "http://data.example.org/datasets/observation/airQuality/api",
+          "href": "http://data.example.org/datasets/airQuality/observation/api",
           "rel": "service",
           "type": "application/openapi+json;version=3.0",
           "title": "WFS3 API definition of the air quality observations service"
@@ -139,44 +141,54 @@ Example response:
 }
 ```
 
-**Request:** ```GET /datasets/observation```
+**Request:** ```GET /datasets/weather```
 
-List of all the available datasets on or under the /observation level with paging and free text filtering. Same format (datasetInfo) as on the top datasets level.
+List of all the available datasets on or under the /weather level with paging and free text filtering. Same format (datasetInfo) as on the top datasets level.
 
-## Weather forecast data (WFS3 compliant)
+## Data access API (WFS3 compliant)
 
-**Request:** ```GET /datasets/forecast/weather```
+**Request:** ```GET /datasets/weather/forecast```
 
 Landing page for the weather forecast data. See [WFS3, API landing page ](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_api_landing_page)
 
-**Request:** ```GET /datasets/forecast/weather/conformance```
+**Request:** ```GET /datasets/weather/forecast/conformance```
 
 The conformance declarations of the weather forecast WFS3 endpoint. See [WFS3, conformance](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_declaration_of_conformance_classes)
 
-**Request:** ```GET /datasets/forecast/weather/api```
+**Request:** ```GET /datasets/weather/forecast/api```
 
 OpenAPI description for the weather forecast WFS3 endpoint. See [WFS3, API definition ](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_api_definition_2)
 
-**Request:** ```GET /datasets/forecast/weather/collections```
+**Request:** ```GET /datasets/weather/forecast/collections```
 
-User friendly data collections, such as observations for cities, obs. station locations etc. (WFS3). Only the "best" currently available combination latest NWM forecast data and forecaster adjustments. See [WFS3, Feature collections metadata](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_collections_metadata)
+User friendly data collections, such as point forecasts for cities, obs. station locations etc. (WFS3). Only the "best" currently available combination latest NWM forecast data and forecaster adjustments. See [WFS3, Feature collections metadata](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_collections_metadata)
 
-**Request:** ```GET /datasets/forecast/weather/collections/cities```
+**Request:** ```GET /datasets/weather/forecast/collections/cities```
 
 The collectionInfo about the collection for forecast data preset for major cities. See [WFS3, Feature collection metadata](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_collection_metadata)
 
 **Request:**
 ```
-GET /datasets/forecast/weather/collections/cities/items?
+GET /datasets/weather/forecast/collections/cities/items?
   time=2018-09-12T00:00:00Z/2018-09-12T12:30:00Z
   &bbox=20.3616603676,60.1215955554,30.7227079655,63.2418932031
 ```
 
-Returns a feature collection of MeasureObservations for all of the default observedProperties for a bbox + time period limited set of city locations. See [WFS3, Feature collections](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_collections)
+Returns a feature collection of MeasureObservations for all of the default observedProperties for a bbox + time period for a limited pre-defined set of city locations. See [WFS3, Feature collections](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_collections)
 
 **Request:**
 ```
-GET /datasets/forecast/weather/collections/cities/items?
+GET /datasets/weather/forecast/collections/cities/items?
+  time=2018-09-12T00:00:00Z/2018-09-12T12:30:00Z
+  &near=20.3616603676,60.1215955554
+  &radius=100km
+```
+
+Returns a feature collection of MeasureObservations for all of the default observedProperties within the distance of 100km of the point (20.3616603676,60.1215955554) and the time period for a limited set of pre-defined city locations. **Note**: the parameters ```near``` and ```radius``` would be extensions of the WFS3 core. See [WFS3, Feature collections](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_collections)
+
+**Request:**
+```
+GET /datasets/weather/forecast/collections/cities/items?
   observedProperty=air_temperature
   &ultimateFeatureOfInterestName=Helsinki*
 ```
@@ -186,15 +198,18 @@ Returns a feature collection of MeasureObservations for air temperature and for
 
 **Request:**
 ```
-  GET /datasets/forecast/weather/collections/cities/items/{id}
+  GET /datasets/weather/forecast/collections/cities/items/{id}
 ```
 
 If the featureIDs are generated in a way that allows disassembling the request parameters, this operation should return the current results of the same request. Ok to return 404 (not found) or 410 (gone), if the original request cannot be determined from the {id}. See [WFS3, Feature](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_2)
 
-## SOFP-API specific, non-WFS3 operations
+## Extension(s) to the WFS3 Dataset Access API
+
+For the clients aware of the additional timeseries extraction functionality, this operation provides a way to "realize" timeseries Observation objects from the underlying datastore/cube based on the specific query parameters.
+
 **Request:**
 ```
-GET /datasets/forecast/weather/collections/cities/timeSeries?
+GET /datasets/weather/forecast/collections/cities/timeSeries?
   time=2018-09-12T00:00:00Z/2018-09-12T12:30:00Z
   &timeStepPeriod=PT1H
   &observedProperty=air_temperature,air_pressure
@@ -203,4 +218,4 @@ GET /datasets/forecast/weather/collections/cities/timeSeries?
 
 Parameters and values defined in the OpenAPI description.
 The ```timeSeries``` operation is at the end of the URL, because the available parameters and their allowed values may depend on the dataset and the collection.
-Would return two MeasureTimeSeriesObservation features (one for each observed property) realised from the backing datacube using the query parameters.
+Would return two MeasureTimeSeriesObservation features (one for each observed property).
