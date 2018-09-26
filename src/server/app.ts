@@ -9,15 +9,19 @@ import * as _ from 'lodash';
 import * as express from 'express';
 import * as http from 'http';
 
+import * as BackendLoader from './backend_loader';
+
 const serverPort = 3000;
 
-let server = new Server();
+var backends = BackendLoader.load('backends/');
+if (backends.length === 0) {
+    console.log('No backends configured, using mock backend instead');
+    backends.push(require('../mock/mock_backend').MockBackend);
+}
 
-// TODO: these need to be dynamically loaded in a manner that allows easy packaging and deployment of core + backend(s)
-import {MockBackend} from '../mock/mock_backend';
-server.backends.push(MockBackend);
+const server = new Server(backends);
 
-let api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: '/sofp' });
+const api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: '/sofp' });
 
 const app = express();
 // Pretty-print

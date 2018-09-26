@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"homepage": "https://github.com/spatineo/sofp-core",
 	"_license": "TBD",
+	"main": "dist/lib/index.js",
 	"engines": {
 		"node": "^6.14.0"
 	},

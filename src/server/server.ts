@@ -5,7 +5,11 @@ import * as _ from 'lodash';
  * The Server contains links to backends and functions to access data (run queries)
  **/
 export class Server {
-    backends : Backend[] = [];
+    backends : Backend[];
+
+    constructor(backends : Backend[] = []) {
+        this.backends = backends;
+    }
 
     getCollections() : Collection[] {
         let ret = [];
@@ -46,6 +50,7 @@ export class Server {
                 ret = cursor.next();
 
                 // Test with filters, if not accepted => null
+                // TODO: This must be done in a web worker / thread
                 if (_.find(cursor.remainingFilter, function(filter) { return !filter.accept(ret); })) {
                     ret = null;
                 }

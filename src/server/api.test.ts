@@ -67,6 +67,8 @@ let api = new API(new MockServer(), { contextPath: '' });
 
 });
 
+// TODO: add conformance requirements
+
 
 test('Context path "" resolves to "/"', () => {
     let api = new API(new MockServer(), { contextPath: '' });
