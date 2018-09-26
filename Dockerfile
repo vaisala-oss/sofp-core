@@ -22,7 +22,7 @@ RUN npm install
 # Copy application, build & test
 COPY . .
 RUN npm run build
-RUN npm test
+RUN npm run test
 
 USER sofp-user
 
