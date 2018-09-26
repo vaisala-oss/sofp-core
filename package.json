@@ -6,7 +6,7 @@
 	"_license": "TBD",
 	"main": "dist/lib/index.js",
 	"engines": {
-		"node": "^6.14.0"
+		"node": "^8.11.4"
 	},
 	"scripts": {
 		"start": "tsc -w & nodemon dist/server/app.js",
