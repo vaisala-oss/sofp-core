@@ -25,7 +25,8 @@
 		}
 	],
 	"dependencies": {
-		"express": "~4.16.3"
+		"express": "~4.16.3",
+		"sofp-lib": "0.0.1"
 	},
 	"devDependencies": {
 		"nodemon": "~1.18.3",

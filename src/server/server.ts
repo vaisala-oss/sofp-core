@@ -1,4 +1,4 @@
-import {Backend, Collection, FeatureCursor, Filter, Query} from '../lib';
+import {Backend, Collection, FeatureCursor, Filter, Query} from 'sofp-lib';
 import * as _ from 'lodash';
 
 /**

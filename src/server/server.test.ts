@@ -1,4 +1,4 @@
-import {Backend, Collection, Query} from '../lib';
+import {Backend, Collection, Query} from 'sofp-lib';
 import {Server} from './server';
 
 const MockCollection = jest.fn<Collection>((name : string) => ({

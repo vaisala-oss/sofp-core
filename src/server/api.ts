@@ -1,5 +1,5 @@
 import {Server} from './server';
-import {Link, Collection} from '../lib';
+import {Link, Collection} from 'sofp-lib';
 
 import * as _ from 'lodash';
 import * as express from 'express';

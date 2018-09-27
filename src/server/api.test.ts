@@ -55,7 +55,7 @@ test('Content specific tests for requirement 11: /req/core/fc-md-links', () => {
 let api = new API(new MockServer(), { contextPath: '' });
     let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024' });
 
-    let self = _.find(response.links, { rel: 'self' });
+    let self = _.find(response.links, l => l.rel === 'self');
     expect(self).toBeDefined();
     expect(self.href).toBe('http://foo.com:1024/collections')
 

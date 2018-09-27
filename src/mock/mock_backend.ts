@@ -1,4 +1,4 @@
-import {Backend, Collection, Link, Query, FeatureCursor, Feature} from '../lib/';
+import {Backend, Collection, Link, Query, FeatureCursor, Feature} from 'sofp-lib';
 
 let MockBackend = new Backend('MockBackend');
 
