@@ -1,1 +1,1 @@
-This is a basic example of a module that can be placed in /backends, that sofp-core will load at runtime. Note that this example is mostly here to show how a module should be packaged and the actual source of which might be out-of-date with regard to the actual spec required by the core.
+This is a crude example of a module that can be placed in /backends that sofp-core will load at runtime. This is here only for BackendLoader tests. For a proper example of a backend, see https://github.com/vaisala-oss/sofp-example-backend
