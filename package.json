@@ -2,8 +2,8 @@
 	"name": "sofp-core",
 	"description": "This is a proof of concept server to test using the WFS 3.0 specification for distributing meteorological data using an encoding that will be calle simple observation features.",
 	"version": "0.0.1",
-	"homepage": "https://github.com/spatineo/sofp-core",
-	"_license": "TBD",
+	"homepage": "https://github.com/vaisala-oss/sofp-core",
+	"license": "MIT",
 	"main": "dist/lib/index.js",
 	"engines": {
 		"node": "^8.11.4"
@@ -16,7 +16,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git@github.com:spatineo/sofp-core.git"
+		"url": "git@github.com:vaisala-oss/sofp-core.git"
 	},
 	"contributors": [
 		{
