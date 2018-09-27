@@ -4,17 +4,18 @@ This is a proof of concept server to test using the WFS 3.0 specification for di
 
 [![Build Status](https://semaphoreci.com/api/v1/spatineo/sofp-core/branches/master/badge.svg)](https://semaphoreci.com/spatineo/sofp-core)
 
+© 2018 Vaisala Corporation
+
 ## Building a docker image of the sofp-core
 
 To build a local version of the docker image:
 
-  docker build -t spatineo/sofp-core .
+  docker build -t vaisala-oss/sofp-core .
 
 To start the local image (removing the container when stopped):
 
-  docker run --rm -p 127.0.0.1:8080:3000/tcp spatineo/sofp-core
+  docker run --rm -p 127.0.0.1:8080:3000/tcp vaisala-oss/sofp-core
 
 ## CI
-
 
 This project is using Semaphore CI: https://semaphoreci.com/spatineo/sofp-core
