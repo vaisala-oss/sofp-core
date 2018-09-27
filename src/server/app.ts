@@ -13,10 +13,23 @@ import * as BackendLoader from './backend_loader';
 
 const serverPort = 3000;
 
-var backends = BackendLoader.load('backends/');
-if (backends.length === 0) {
-    console.log('No backends configured, using mock backend instead');
-    backends.push(require('../mock/mock_backend').MockBackend);
+var backends;
+if (process.argv.length > 2) {
+    // Load backends from command line paths. Useful when developing a backend
+    backends = [];
+    for (var i = 2; i < process.argv.length; i++) {
+        var dir = process.argv[i];
+        if (dir[0] !== '/') {
+            dir = process.cwd() + '/' + dir;
+        }
+        _.each(BackendLoader.loadModule(dir), backend => backends.push(backend));
+    }
+} else {
+    backends = BackendLoader.load('backends/');
+    if (backends.length === 0) {
+        console.log('No backends configured, using mock backend instead');
+        backends.push(require('../mock/mock_backend').MockBackend);
+    }
 }
 
 const server = new Server(backends);
