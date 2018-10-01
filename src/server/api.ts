@@ -1,5 +1,5 @@
 import {Server} from './server';
-import {Link, Collection} from 'sofp-lib';
+import {Link, Collection, Query} from 'sofp-lib';
 
 import * as _ from 'lodash';
 import * as express from 'express';
@@ -70,6 +70,43 @@ export class API {
             
             let response = this.getFeatureCollectionsMetadata({ baseUrl: getBaseUrl(req) }, collection);
             res.json(response);
+        });
+
+        app.get(this.contextPath + 'collections/:name/items', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.name);
+            if (!collection) {
+                return next();
+            }
+            
+            //let query = this.parseQuery(req);
+            let query : Query = { filters: [] };
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+
+            var n = 0;
+            res.write('{\n');
+            res.write('\t"type": "FeatureCollection",\n');
+            res.write('\t"features": [');
+            var stream = collection.executeQuery(query);
+            stream.on('data', (d) => {
+                if (n > 0) {
+                    res.write(',');
+                }
+                var json = JSON.stringify(d, null, '\t');
+                json = json.replace(/^\t/gm, '\t\t');
+                json = json.substring(0,json.length-1)+'\t}';
+                res.write(json);
+                n++;
+            });
+
+            stream.on('end', () => {
+                res.write('],\n');
+                res.write('\t"timestamp": "'+new Date().toISOString()+'",\n');
+                res.write('\t"links": ["todo"]\n');
+                res.write('\t"numberReturned": '+n+'\n');
+                res.write('}\n');
+                res.end();
+            });
         });
 
         app.get(this.contextPath + 'conformance', (req, res) => {
