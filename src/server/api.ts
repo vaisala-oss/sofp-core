@@ -62,6 +62,16 @@ export class API {
             res.json(response);
         });
 
+        app.get(this.contextPath + 'collections/:name', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.name);
+            if (!collection) {
+                return next();
+            }
+            
+            let response = this.getFeatureCollectionsMetadata({ baseUrl: getBaseUrl(req) }, collection);
+            res.json(response);
+        });
+
         app.get(this.contextPath + 'conformance', (req, res) => {
             let response = this.getConformancePage({ baseUrl: getBaseUrl(req) });
             res.json(response);
@@ -103,7 +113,10 @@ export class API {
      * Return object following the WFS 3.0.0 draft 1 specification for feature collections metadata
      * @link https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_feature_collections_metadata
      */ 
-    getFeatureCollectionsMetadata(params : RequestParameters) : APIResponse {
+    getFeatureCollectionsMetadata(params : RequestParameters, collection? : Collection) : APIResponse {
+        var collections = collection ? [ collection ] : this.server.getCollections();
+        collections = _.cloneDeep(collections);
+
         let ret : APIResponse = {
             links: [{
                 href: params.baseUrl + '/collections',
@@ -111,12 +124,12 @@ export class API {
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
             }],
-            collections: _.cloneDeep(this.server.getCollections())
+            collections: collections
         };
 
-        _.each(ret.collections, (collection) => {
+        _.each(collections, (collection) => {
             collection.links.unshift({
-                href: params.baseUrl + '/collections/'+collection.name,
+                href: params.baseUrl + '/collections/'+collection.name+'/items',
                 rel: 'item',
                 type: 'application/json'
             });
