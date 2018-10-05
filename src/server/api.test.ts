@@ -64,10 +64,34 @@ let api = new API(new MockServer(), { contextPath: '' });
         expect(link.rel).toBeDefined();
         expect(link.type).toBeDefined();
     });
-
 });
 
 // TODO: add conformance requirements
+
+
+test('Server collection response should only include API fields, not "private" fields', () => {
+
+    const MockServer2 = jest.fn<Server>(() => ({
+        getCollections: () => [{
+            name: 'foo',
+            title: 'blaa',
+            links: [],
+            xxx: 'this field should be hidden'
+        }]
+    }));
+
+
+    let api = new API(new MockServer2(), { contextPath: '' });
+    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024' });
+    expect(response.collections).toBeInstanceOf(Array);
+    expect(response.collections.length).toBe(1);
+
+    let c = response.collections[0];
+    expect(c.name).toBe('foo');
+    expect(c.title).toBe('blaa');
+    expect(c.xxx).toBeUndefined();
+});
+
 
 
 test('Context path "" resolves to "/"', () => {
