@@ -10,7 +10,9 @@ const numberRegex = new RegExp(/^(\-|\+)?([0-9]+|[0-9]*\.[0-9]+|Infinity)$/);
 function filterNumber(value : string) {
     return numberRegex.test(value) ? Number(value) : NaN;
 }
-
+/**
+ * Rudimentary 2D bbox filter implementation that only works when bbox and feature are in the same CRS
+ **/
 class BBOXFilter implements Filter {
     filterClass : string = 'BBOXFilter';
     asQuery     : string = null;
