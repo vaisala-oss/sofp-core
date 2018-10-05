@@ -236,7 +236,7 @@ export class API {
                 res.write('\t}');
             }
 
-            res.write(']\n');
+            res.write('],\n');
             res.write('\t"numberReturned": '+n+'\n');
             res.write('}\n');
             res.end();
