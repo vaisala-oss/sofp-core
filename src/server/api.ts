@@ -18,6 +18,8 @@ export interface RequestParameters {
     baseUrl : string;
     query? : Map<string, string>;
     body? : Buffer;
+    collection? : Collection;
+    itemQuery? : Query;
 };
 
 export interface APIParameters {
@@ -79,15 +81,22 @@ export class API {
             }
             
             //let query = this.parseQuery(req);
-            const query : Query = { filters: [/*{
+            const query : Query = {
+                limit:   req.query.limit ? Number(req.query.limit) : 10,
+                skip:    req.query.skip  ? Number(req.query.skip)  : 0,
+                filters: [/*{
                 accept: function(feature) {
                     return feature.properties.ParameterName === 'Humidity';
                 }
             }*/] };
 
             const stream : FeatureStream = collection.executeQuery(query);
-
-            this.produceOutput(stream, res);
+            var params : RequestParameters = {
+                baseUrl: getBaseUrl(req),
+                collection: collection,
+                itemQuery: query
+            };
+            this.produceOutput(params, stream, res);
         });
 
         app.get(this.contextPath + 'conformance', (req, res) => {
@@ -166,7 +175,7 @@ export class API {
         };
     }
 
-    produceOutput(stream : FeatureStream, res : express.Response) {
+    produceOutput(params : RequestParameters, stream : FeatureStream, res : express.Response) {
         var n = 0;
         function startResponse(res) {
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -194,7 +203,33 @@ export class API {
             }
             res.write('],\n');
             res.write('\t"timestamp": "'+new Date().toISOString()+'",\n');
-            res.write('\t"links": ["todo"]\n'); // TODO
+            res.write('\t"links": [');
+
+            var selfUri = params.baseUrl + '/collections/' + params.collection.name + '/items'+
+                '?limit=' + params.itemQuery.limit +
+                '&skip='+(params.itemQuery.skip);
+            // TODO: add other query parameters
+            res.write('{\n');
+            res.write('\t\t"href": '+JSON.stringify(selfUri)+',\n');
+            res.write('\t\t"rel": "self",\n');
+            res.write('\t\t"type":"application/geo+json",\n');
+            res.write('\t\t"title":"This document"\n');
+            res.write('\t}');
+
+            if (n === params.itemQuery.limit) {
+                var nextUri = params.baseUrl + '/collections/' + params.collection.name + '/items'+
+                    '?limit=' + params.itemQuery.limit +
+                    '&skip='+(params.itemQuery.skip + n);
+                // TODO: add other query parameters
+                res.write(',{\n');
+                res.write('\t\t"href": '+JSON.stringify(nextUri)+',\n');
+                res.write('\t\t"rel": "next",\n');
+                res.write('\t\t"type":"application/geo+json",\n');
+                res.write('\t\t"title":"Next results"\n');
+                res.write('\t}');
+            }
+
+            res.write(']\n');
             res.write('\t"numberReturned": '+n+'\n');
             res.write('}\n');
             res.end();
