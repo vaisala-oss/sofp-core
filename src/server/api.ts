@@ -1,8 +1,11 @@
 import {Server} from './server';
-import {Link, Collection, Query, FeatureStream} from 'sofp-lib';
+import {FilterProvider} from './filter_provider';
+import {Collection, FeatureStream, Filter, Link, Query} from 'sofp-lib';
 
 import * as _ from 'lodash';
 import * as express from 'express';
+
+import {filterProviders} from './filters/';
 
 /**
  * The API class provides accessors to produce metadata for the WFS 3.0 API. The API class wraps a Server object 
@@ -80,15 +83,12 @@ export class API {
                 return next();
             }
             
-            //let query = this.parseQuery(req);
+            let filters = this.parseFilters(req);
             const query : Query = {
                 limit:   req.query.limit ? Number(req.query.limit) : 10,
                 skip:    req.query.skip  ? Number(req.query.skip)  : 0,
-                filters: [/*{
-                accept: function(feature) {
-                    return feature.properties.ParameterName === 'Humidity';
-                }
-            }*/] };
+                filters: filters
+            };
 
             const stream : FeatureStream = collection.executeQuery(query);
             var params : RequestParameters = {
@@ -103,6 +103,10 @@ export class API {
             let response = this.getConformancePage({ baseUrl: getBaseUrl(req) });
             res.json(response);
         });
+    }
+
+    parseFilters(req : express.Request) : Filter[] {
+        return _.map(filterProviders, fp => fp.parseFilter(req)).filter(_.isObject);
     }
 
     /**
@@ -205,10 +209,13 @@ export class API {
             res.write('\t"timestamp": "'+new Date().toISOString()+'",\n');
             res.write('\t"links": [');
 
-            var selfUri = params.baseUrl + '/collections/' + params.collection.name + '/items'+
-                '?limit=' + params.itemQuery.limit +
-                '&skip='+(params.itemQuery.skip);
-            // TODO: add other query parameters
+            var queryString = _.map(params.itemQuery.filters, f => f.asQuery);
+            queryString.push('limit=' + params.itemQuery.limit);
+            queryString.push('skip='+(params.itemQuery.skip));
+
+            var selfUri = params.baseUrl + '/collections/' + params.collection.name + '/items?' +
+                queryString.join('&');
+
             res.write('{\n');
             res.write('\t\t"href": '+JSON.stringify(selfUri)+',\n');
             res.write('\t\t"rel": "self",\n');
@@ -217,10 +224,10 @@ export class API {
             res.write('\t}');
 
             if (n === params.itemQuery.limit) {
-                var nextUri = params.baseUrl + '/collections/' + params.collection.name + '/items'+
-                    '?limit=' + params.itemQuery.limit +
-                    '&skip='+(params.itemQuery.skip + n);
-                // TODO: add other query parameters
+                queryString[queryString.length-1] = 'skip='+(params.itemQuery.skip+n);
+                var nextUri = params.baseUrl + '/collections/' + params.collection.name + '/items?' +
+                    queryString.join('&');
+
                 res.write(',{\n');
                 res.write('\t\t"href": '+JSON.stringify(nextUri)+',\n');
                 res.write('\t\t"rel": "next",\n');
