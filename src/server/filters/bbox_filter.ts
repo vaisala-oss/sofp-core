@@ -8,9 +8,7 @@ import * as turf from '@turf/turf';
 
 const numberRegex = new RegExp(/^(\-|\+)?([0-9]+|[0-9]*\.[0-9]+|Infinity)$/);
 function filterNumber(value : string) {
-  if (numberRegex.test(value))
-    return Number(value);
-  return NaN;
+    return numberRegex.test(value) ? Number(value) : NaN;
 }
 
 class BBOXFilter implements Filter {
