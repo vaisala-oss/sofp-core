@@ -1,6 +1,6 @@
 import {Server} from './server';
 import {FilterProvider} from './filter_provider';
-import {Collection, FeatureStream, Filter, Link, Query} from 'sofp-lib';
+import {Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
 
 import * as _ from 'lodash';
 import * as express from 'express';
@@ -85,8 +85,8 @@ export class API {
             
             let filters = this.parseFilters(req);
             const query : Query = {
-                limit:   req.query.limit ? Number(req.query.limit) : 10,
-                skip:    req.query.skip  ? Number(req.query.skip)  : 0,
+                limit:     req.query.limit ? Number(req.query.limit) : 10,
+                nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
                 filters: filters
             };
 
@@ -182,6 +182,7 @@ export class API {
 
     produceOutput(params : RequestParameters, stream : FeatureStream, res : express.Response) {
         var n = 0;
+        var lastItem : Item = undefined;
         function startResponse(res) {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.write('{\n');
@@ -189,13 +190,14 @@ export class API {
             res.write('\t"features": [');
         }
 
-        stream.on('data', (d) => {
+        stream.on('data', (d : Item) => {
+            lastItem = d;
             if (n === 0) {
                 startResponse(res);
             } else {
                 res.write(',');
             }
-            var json = JSON.stringify(d, null, '\t');
+            var json = JSON.stringify(d.feature, null, '\t');
             json = json.replace(/^\t/gm, '\t\t');
             json = json.substring(0,json.length-1)+'\t}';
             res.write(json);
@@ -212,7 +214,11 @@ export class API {
 
             var queryString = _.map(params.itemQuery.filters, f => f.asQuery);
             queryString.push('limit=' + params.itemQuery.limit);
-            queryString.push('skip='+(params.itemQuery.skip));
+            var nextTokenIndex;
+            if (params.itemQuery.nextToken) {
+                queryString.push('nextToken='+encodeURIComponent(params.itemQuery.nextToken));
+                nextTokenIndex = queryString.length-1;
+            }
 
             var selfUri = params.baseUrl + '/collections/' + params.collection.name + '/items?' +
                 queryString.join('&');
@@ -224,8 +230,11 @@ export class API {
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
 
-            if (n === params.itemQuery.limit) {
-                queryString[queryString.length-1] = 'skip='+(params.itemQuery.skip+n);
+            if (n === params.itemQuery.limit && lastItem.nextToken !== undefined && lastItem.nextToken !== null) {
+                if (nextTokenIndex === undefined) {
+                    nextTokenIndex = queryString.length;
+                }
+                queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(lastItem.nextToken);
                 var nextUri = params.baseUrl + '/collections/' + params.collection.name + '/items?' +
                     queryString.join('&');
 
