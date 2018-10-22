@@ -26,7 +26,12 @@ class BBOXFilter implements Filter {
         return !turf.booleanDisjoint(turfFeature, this.parameters.turfPolygon);
     }
 
-    constructor(param : string) {
+    constructor(param : string, crs : string) {
+        this.asQuery = 'bbox='+encodeURIComponent(param);
+        if (crs !== null && crs !== undefined) {
+            this.asQuery += '&bbox-crs='+encodeURIComponent(crs);
+        }
+
         this.parameters.coords = _.map(param.split(','), filterNumber);
         if (this.parameters.coords.length !== 4 && this.parameters.coords.length !== 6) {
             throw new Error('Illegal bounding box '+param)
@@ -35,17 +40,18 @@ class BBOXFilter implements Filter {
             throw new Error('Illegal entry in bounding box '+param);
         }});
 
-        this.parameters.turfPolygon = turf.bboxPolygon(this.parameters.coords);
+        // TODO: reproject if crs is set
+        // TODO: add proj4 2.5.0 as a dependency
 
-        this.asQuery = 'bbox='+encodeURIComponent(param);
+        this.parameters.turfPolygon = turf.bboxPolygon(this.parameters.coords);
     }
 
 }
 
 export class BBOXFilterProvider implements FilterProvider {
     parseFilter(req : express.Request) : Filter {
-        if (_.isString(req.query.bbox)) {
-            return new BBOXFilter(req.query.bbox);
+        if (_.isString(req.query['bbox'])) {
+            return new BBOXFilter(req.query['bbox'], req.query['bbox-crs']);
         }
         return null;
     }
