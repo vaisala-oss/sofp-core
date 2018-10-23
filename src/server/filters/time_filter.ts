@@ -14,14 +14,33 @@ class TimeFilter implements Filter {
         momentEnd: null,
         duration: null
     };
+    options : object;
     asQuery : String;
 
     accept = function(f : Feature) {
-        // TODO:
+        var propertiesAsMoments = _.reduce(f.properties, (k, memo) => {
+            var tmp = moment.utc(f.properties[k]);
+            if (tmp.isValid()) {
+                memo[k] = tmp;
+            }
+            return memo;
+        }, {});
+
+        if (_.size(propertiesAsMoments) === 0) {
+            return this.options.acceptFeaturesWithNoTimeField;
+        }
+
+        if (_.size(propertiesAsMoments) > 1) {
+            throw new Error('Multiple time fields in feature, unable to filter!');
+        }
+
+        console.log(propertiesAsMoments);
+
         return false;
     }
 
-    constructor(timeString) {
+    constructor(timeString, options) {
+        this.options = options;
         this.asQuery = 'time='+encodeURIComponent(timeString);
         this.parameters.timeString = timeString;
 
@@ -53,9 +72,17 @@ class TimeFilter implements Filter {
 const reservedParameterNames = [ 'next', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
 
 export class TimeFilterProvider implements FilterProvider {
+    options = {
+        acceptFeaturesWithNoTimeField: null
+    };
+
+    constructor(acceptFeaturesWithNoTimeField : boolean = false) {
+        this.options.acceptFeaturesWithNoTimeField = acceptFeaturesWithNoTimeField;
+    }
+
     parseFilter(req : express.Request) : Filter {
         if (req.query.time) {
-            return new TimeFilter(req.query.time);
+            return new TimeFilter(req.query.time, this.options);
         }
         return null;
     }
