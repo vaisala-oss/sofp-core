@@ -18,25 +18,35 @@ class TimeFilter implements Filter {
     asQuery : String;
 
     accept = function(f : Feature) {
-        var propertiesAsMoments = _.reduce(f.properties, (k, memo) => {
-            var tmp = moment.utc(f.properties[k]);
+        var propertiesAsMoments = _.reduce(f.properties, (memo, v, k) => {
+            var tmp = moment.utc(f.properties[k], moment.ISO_8601);
             if (tmp.isValid()) {
                 memo[k] = tmp;
             }
             return memo;
         }, {});
 
-        if (_.size(propertiesAsMoments) === 0) {
+        var timeValues : moment.Moment[] = _.values(propertiesAsMoments);
+
+        if (timeValues.length === 0) {
             return this.options.acceptFeaturesWithNoTimeField;
         }
 
-        if (_.size(propertiesAsMoments) > 1) {
-            throw new Error('Multiple time fields in feature, unable to filter!');
+        // WFS_FES 3.0.0-draft.1, requirement 23 states:
+        // "If a feature has multiple temporal properties, it is the decision of the server whether only 
+        //  a single temporal property is used to determine the extent or all relevant temporal properties."
+        //  => We choose to reject the feature if any of the time values are out of the filter span
+        for (var i = 0; i < timeValues.length; i++) {
+            if (timeValues[i].isBefore(this.parameters.momentStart)) {
+                return false;
+            }
+
+            if (timeValues[i].isAfter(this.parameters.momentEnd)) {
+                return false;
+            }
         }
 
-        console.log(propertiesAsMoments);
-
-        return false;
+        return true;
     }
 
     constructor(timeString, options) {
@@ -45,17 +55,17 @@ class TimeFilter implements Filter {
         this.parameters.timeString = timeString;
 
         if (timeString.indexOf('/') === -1) {
-            this.parameters.momentStart = this.parameters.momentEnd = moment.utc(timeString);
+            this.parameters.momentStart = this.parameters.momentEnd = moment.utc(timeString, moment.ISO_8601);
             this.parameters.duration = moment.duration(0);
         } else {
             var parts = timeString.split('/');
-            this.parameters.momentStart = moment.utc(parts[0]);
+            this.parameters.momentStart = moment.utc(parts[0], moment.ISO_8601);
 
             if (parts[1][0] === 'P') {
                 this.parameters.duration = moment.duration(parts[1]);
                 this.parameters.momentEnd = moment.utc(moment(this.parameters.momentStart)).add(this.parameters.duration);
             } else {
-                this.parameters.momentEnd = moment.utc(parts[1]);
+                this.parameters.momentEnd = moment.utc(parts[1], moment.ISO_8601);
                 this.parameters.duration = moment.duration(this.parameters.momentEnd.diff(this.parameters.momentStart));
             }
         }
@@ -68,8 +78,6 @@ class TimeFilter implements Filter {
 
     }
 };
-
-const reservedParameterNames = [ 'next', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
 
 export class TimeFilterProvider implements FilterProvider {
     options = {

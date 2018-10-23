@@ -102,3 +102,70 @@ test('Test duration with month', () => {
     expect(filter.parameters.duration.minutes()).toBe(31);
     expect(filter.parameters.duration.seconds()).toBe(12);
 });
+
+
+test('Test filter (not accept 1s before exact start date)', () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { timeField: '2017-12-31T23:59:59Z' } };
+    expect(filter.accept(feature)).toBeFalsy();
+});
+
+test('Test filter (accept exact start date)', () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { timeField: '2018-01-01T00:00:00Z' } };
+    expect(filter.accept(feature)).toBeTruthy();
+});
+
+test('Test filter (accept date between start and end)', () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { timeField: '2018-01-01T06:10:42Z' } };
+    expect(filter.accept(feature)).toBeTruthy();
+});
+
+test('Test filter (accept date exactly at end)', () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT7H8M9S' }});
+
+    let feature = { properties: { timeField: '2018-01-02T07:08:09Z' } };
+    expect(filter.accept(feature)).toBeTruthy();
+});
+
+test('Test filter (not accept 1s after exact end date)', () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT7H8M9S' }});
+
+    let feature = { properties: { timeField: '2018-01-02T07:08:10Z' } };
+    expect(filter.accept(feature)).toBeFalsy();
+});
+
+
+test('Test filter, no time features, provider configured to accept', () => {
+    let provider2 = new TimeFilterProvider(true);
+    let filter = provider2.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { x: 'y' } };
+    expect(filter.accept(feature)).toBeTruthy();
+});
+
+test('Test filter, no time features, provider configured to not accept', () => {
+    let provider2 = new TimeFilterProvider(false);
+    let filter = provider2.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { x: 'y' } };
+    expect(filter.accept(feature)).toBeFalsy();
+});
+
+test('Test filter with multiple timefields, all within filter bounds => accept' , () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { timeField1: '2018-01-01T06:10:42Z', timeField2: '2018-01-01T09:11:22Z' } };
+    expect(filter.accept(feature)).toBeTruthy();
+});
+
+test('Test filter with multiple timefields, one outside filter bounds => accept' , () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }});
+
+    let feature = { properties: { timeField1: '2018-01-01T06:10:42Z', timeField2: '2017-01-01T09:11:22Z' } };
+    expect(filter.accept(feature)).toBeFalsy();
+});
