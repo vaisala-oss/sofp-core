@@ -78,6 +78,34 @@ test('Test parse date + duration', () => {
     expect(filter.parameters.momentEnd.diff(filter.parameters.momentStart)).toBe(filter.parameters.duration.asMilliseconds());
 });
 
+test('Test parse date + duration with no month/day part', () => {
+    let filter = provider.parseFilter({ query: { time: '2018-02-12T00:00:00Z/P12H31M12S' }});
+    
+    expect(filter.parameters.momentStart.year()).toBe(2018);
+    expect(filter.parameters.momentStart.month()).toBe(1); // January = 0
+    expect(filter.parameters.momentStart.date()).toBe(12);
+    expect(filter.parameters.momentStart.hour()).toBe(0);
+    expect(filter.parameters.momentStart.minute()).toBe(0);
+    expect(filter.parameters.momentStart.second()).toBe(0);
+
+    expect(filter.parameters.momentEnd.year()).toBe(2018);
+    expect(filter.parameters.momentEnd.month()).toBe(1); // January = 0
+    expect(filter.parameters.momentEnd.date()).toBe(12);
+    expect(filter.parameters.momentEnd.hour()).toBe(12);
+    expect(filter.parameters.momentEnd.minute()).toBe(31);
+    expect(filter.parameters.momentEnd.second()).toBe(12);
+
+
+    expect(filter.parameters.duration.months()).toBe(0);
+    expect(filter.parameters.duration.days()).toBe(0);
+    expect(filter.parameters.duration.hours()).toBe(12);
+    expect(filter.parameters.duration.minutes()).toBe(31);
+    expect(filter.parameters.duration.seconds()).toBe(12);
+    
+
+    expect(filter.parameters.momentEnd.diff(filter.parameters.momentStart)).toBe(filter.parameters.duration.asMilliseconds());
+});
+
 
 test('Test duration with month', () => {
     let filter = provider.parseFilter({ query: { time: '2018-02-12T00:00:00Z/P7M6DT12H31M12S' }});

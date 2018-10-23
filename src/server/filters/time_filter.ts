@@ -62,7 +62,11 @@ class TimeFilter implements Filter {
             this.parameters.momentStart = moment.utc(parts[0], moment.ISO_8601);
 
             if (parts[1][0] === 'P') {
-                this.parameters.duration = moment.duration(parts[1]);
+                var periodPart = parts[1];
+                if (periodPart.indexOf('T') === -1) {
+                    periodPart = 'P0M0DT'+periodPart.substring(1);
+                }
+                this.parameters.duration = moment.duration(periodPart);
                 this.parameters.momentEnd = moment.utc(moment(this.parameters.momentStart)).add(this.parameters.duration);
             } else {
                 this.parameters.momentEnd = moment.utc(parts[1], moment.ISO_8601);
@@ -75,7 +79,6 @@ class TimeFilter implements Filter {
             !this.parameters.duration.isValid()) {
             throw new Error('Illegal timeString "'+timeString+'"');
         }
-
     }
 };
 
