@@ -27,7 +27,8 @@
 	],
 	"dependencies": {
 		"express": "~4.16.3",
-		"sofp-lib": "0.0.5",
+		"lodash": "~4.17.11",
+		"sofp-lib": "0.0.6",
 		"moment": "~2.22.2",
 		"moment-isoduration": "0.0.3",
 		"@turf/turf": "~5.1.6"

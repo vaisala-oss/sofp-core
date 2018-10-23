@@ -99,6 +99,20 @@ export class API {
             this.produceOutput(params, stream, res);
         });
 
+        app.get(this.contextPath + 'collections/:name/items/:id', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.name);
+            if (!collection) {
+                return next();
+            }
+
+            collection.getFeatureById(req.params.id).then(f => {
+                if (!f) {
+                    return next();
+                }
+                res.json(f);
+            });
+        });
+
         app.get(this.contextPath + 'conformance', (req, res) => {
             let response = this.getConformancePage({ baseUrl: getBaseUrl(req) });
             res.json(response);
