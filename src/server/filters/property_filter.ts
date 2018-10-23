@@ -28,7 +28,7 @@ class PropertyFilter implements Filter {
     }
 };
 
-const reservedParameterNames = [ 'next', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
+const reservedParameterNames = [ 'nextToken', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
 
 export class PropertyFilterProvider implements FilterProvider {
     parseFilter(req : express.Request) : Filter {
