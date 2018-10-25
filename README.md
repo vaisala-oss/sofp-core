@@ -10,7 +10,7 @@ This is a proof of concept server to test using the WFS 3.0 specification for di
 
 To build a local version of the docker image:
 
-  docker build -t sofp/core .
+  docker build --no-cache -t sofp/core .
 
 To start the local image (removing the container when stopped):
 
