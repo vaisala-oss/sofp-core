@@ -28,11 +28,17 @@ class PropertyFilter implements Filter {
     }
 };
 
-const reservedParameterNames = [ 'nextToken', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
+const reservedParameterNames = [ 'nexttoken', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
 
 export class PropertyFilterProvider implements FilterProvider {
     parseFilter(req : express.Request) : Filter {
-        var properties = _.pickBy(req.query, (v, k) => reservedParameterNames.indexOf(k) === -1 );
+        var properties = {};
+        _.each(req.query, (v, k) => {
+            k = k.toLowerCase();
+            if (reservedParameterNames.indexOf(k) === -1) {
+                properties[k] = v;
+            }
+        });
 
         if (_.size(properties) > 0) {
             return new PropertyFilter(properties);
