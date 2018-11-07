@@ -20,8 +20,11 @@ test('Single-backend server returns single collection', () => {
 
     let collections = server.getCollections();
 
-    expect(collections.length).toEqual(1);
-    expect(collections[0].name).toEqual('Foo');
+    expect(collections).toEqual([
+        {
+            name: 'Foo'
+        }
+    ]);
 });
 
 test('Multi-backend server returns all collections', () => {
@@ -38,10 +41,11 @@ test('Multi-backend server returns all collections', () => {
 
     let collections = server.getCollections();
 
-    expect(collections.length).toEqual(3);
-    expect(collections[0].name).toEqual('Foo1');
-    expect(collections[1].name).toEqual('Foo2');
-    expect(collections[2].name).toEqual('Bar');
+    expect(collections).toEqual([
+        { name: 'Foo1' },
+        { name: 'Foo2' },
+        { name: 'Bar' }
+    ]);
 });
 
 test('Find collection by name', () => {
