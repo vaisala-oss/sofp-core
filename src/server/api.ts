@@ -223,7 +223,7 @@ export class API {
                 startResponse(res);
             }
             res.write('],\n');
-            res.write('\t"timestamp": "'+new Date().toISOString()+'",\n');
+            res.write('\t"timeStamp": "'+new Date().toISOString()+'",\n');
             res.write('\t"links": [');
 
             var queryString = _.map(params.itemQuery.filters, f => f.asQuery);
