@@ -218,6 +218,11 @@ export class API {
             n++;
         });
 
+        stream.on('error', err => {
+            // TODO: how to handle the error case? We might have streamed content already out?
+            console.error('Received error from backend', err);
+        });
+
         stream.on('end', () => {
             if (n === 0) {
                 startResponse(res);
