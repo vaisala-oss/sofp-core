@@ -193,8 +193,7 @@ GET /datasets/weather/forecast/collections/cities/items?
   &ultimateFeatureOfInterestName=Helsinki*
 ```
 
-Returns a feature collection of MeasureObservations for air temperature and for
-  observations with Helsinki as the ultimate feature of interest.
+Returns a feature collection of MeasureObservations for air temperature with Helsinki as the ultimate feature of interest.
 
 **Request:**
 ```
@@ -202,6 +201,31 @@ Returns a feature collection of MeasureObservations for air temperature and for
 ```
 
 If the featureIDs are generated in a way that allows disassembling the request parameters, this operation should return the current results of the same request. Ok to return 404 (not found) or 410 (gone), if the original request cannot be determined from the {id}. See [WFS3, Feature](https://rawgit.com/opengeospatial/WFS_FES/master/docs/17-069.html#_feature_2)
+
+## Features Extracted from 4D Data Cube (e.g. Weather Forecast Model)
+
+**Request:**
+```
+ GET /datasets/weather/forecast/harmonie/items?
+   parametername=Temperature,Humidity
+   &time=20181204T150000/20181204T180000
+   &bbox=20,60,30,70
+   &limit=100
+```
+
+Returns a feature collection of MeasureObservations for Harmonie weather model output. Regural grid with 100 points (10x10) is resampled from the data.   
+
+**Request:**
+```
+ GET /datasets/weather/forecast/harmonie/items?
+   parametername=Temperature,Humidity
+   &time=20181204T150000/20181204T180000
+   &bbox=20,60,30,70
+   &lat=60.159900&lon=24.876116
+```
+
+Returns a feature collection of MeasureObservations for Harmonie weather model output. Time series from exact given location is returned.
+
 
 ## Extension(s) to the WFS3 Dataset Access API
 
