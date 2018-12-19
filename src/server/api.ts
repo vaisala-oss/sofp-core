@@ -30,6 +30,27 @@ export interface APIParameters {
     contextPath?: string;
 }
 
+export function deduceContextPath(configuredContextPath, xForwardedPath) {
+    function removeEndSlash(str) {
+        while (str.charAt(str.length-1) === '/') {
+            str = str.substring(0, str.length-1);
+        }
+        return str;
+    }
+
+    var ret = removeEndSlash(configuredContextPath);
+
+    if (xForwardedPath) {
+        var idx = xForwardedPath.lastIndexOf(ret);
+        if (idx === -1) {
+            throw Error("unable to deduce context path (configured '"+configuredContextPath+"', X-Forwarded-Path: '"+xForwardedPath+"')");
+        }
+        ret = removeEndSlash(xForwardedPath.substring(0, idx+ret.length));
+    }
+
+    return ret;
+}
+
 export class API {
     server : Server;
 
@@ -51,10 +72,17 @@ export class API {
 
     connectExpress(app: express) : void {
         let getBaseUrl = (req: express.req) : string => {
-            let ret = req.protocol + '://' + req.headers.host + this.contextPath;
-            while (ret.charAt(ret.length-1) === '/') {
-                ret = ret.substr(0, ret.length-1);
+            let protocol = req.headers['x-forwarded-proto'] || req.protocol;
+            let host = req.headers['x-forwarded-host'];
+            if (host) {
+                if (req.headers['x-forwarded-port']) {
+                    host += ':'+req.headers['x-forwarded-port'];
+                }
+            } else {
+                host = req.headers.host;
             }
+            let contextPath = deduceContextPath(this.contextPath, req.headers['x-forwarded-path']);
+            let ret = protocol + '://' + host + contextPath;
             return ret;
         }
         app.get(this.contextPath, (req, res) => {

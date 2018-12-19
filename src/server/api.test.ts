@@ -1,4 +1,4 @@
-import {API} from './api';
+import {API, deduceContextPath} from './api';
 import {Server} from './server';
 
 import * as _ from 'lodash';
@@ -128,4 +128,30 @@ test('Context path "/foo/" resolves to "/foo/"', () => {
     let api = new API(new MockServer(), { contextPath: '/foo/' });
 
     expect(api.contextPath).toEqual('/foo/');
+});
+
+
+test('Test that context path deducing works correctly', () => {
+    var cases = [
+        ["/sofp",  null, "/sofp"],
+        ["/sofp/", null, "/sofp"],
+
+        ["/sofp",  "/foo/sofp",  "/foo/sofp" ],
+        ["/sofp",  "/foo/sofp/", "/foo/sofp" ],
+        ["/sofp/", "/foo/sofp",  "/foo/sofp" ],
+        ["/sofp/", "/foo/sofp/", "/foo/sofp" ],
+
+        ["/sofp",  "/foo/sofp/collections/foo",  "/foo/sofp" ],
+        ["/sofp",  "/foo/sofp/collections/foo/", "/foo/sofp" ],
+        ["/sofp/", "/foo/sofp/collections/foo",  "/foo/sofp" ],
+        ["/sofp/", "/foo/sofp/collections/foo", "/foo/sofp" ]
+    ];
+    var i, configuredPath, xForwardedPath, expectedResult;
+    for (i = 0; i < cases.length; i++) {
+        configuredPath = cases[i][0];
+        xForwardedPath = cases[i][1];
+        expectedResult = cases[i][2];
+
+        expect(deduceContextPath(configuredPath, xForwardedPath)).toEqual(expectedResult);
+    }
 });
