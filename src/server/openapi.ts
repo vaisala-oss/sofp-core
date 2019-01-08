@@ -18,7 +18,7 @@ export class OpenAPI {
 
     getObject() {
         const ret = {
-            openapi: '3.0.0',
+            openapi: '3.0.1',
             info: {
                 version: pkgInfo.version,
                 title: 'SOFP WFS 3.0 server',
@@ -80,7 +80,18 @@ export class OpenAPI {
 
                             'If a feature has multiple spatial geometry properties, it is the decision of the '+
                             'server whether only a single spatial geometry property is used to determine '+
-                            'the extent or all relevant geometries.'
+                            'the extent or all relevant geometries.',
+                        required: false,
+                        schema: {
+                            type: 'array',
+                            minItems: 4,
+                            maxItems: 4, // 6
+                            items: {
+                              type: 'number'
+                            },
+                            style: 'form',
+                            explode: false
+                        }
                     },
                     // 'bbox-crs': { }, // TODO:
                     time: {
@@ -261,40 +272,6 @@ export class OpenAPI {
                             }
                         }
                     },
-/*
-                    featureCollectionGeoJSON: {
-                        type: 'object',
-                        required: [ 'type', 'features' ],
-                        properties: {
-                            type: { type: 'string', enum: [ 'FeatureCollection' ] },
-                            features: { type: 'array', items: { '$ref': '#/components/schemas/featureGeoJSON' }},
-                            links: { type: 'array', items: { '$ref': '#/components/schemas/link' }},
-                            timeStamp: { type: 'string', format: 'dateTime' },
-                            numberMatched: { type: 'integer', minimum: 0 },
-                            numberReturned: { type: 'integer', minimum: 0 }
-                        }
-                    },
-                    featureGeoJSON: {
-                        type: 'object',
-                        required: [ 'type', 'geometry', 'properties' ],
-                        properties: {
-                            type: {
-                                type: 'string',
-                                enum: [ 'Feature' ]
-                            },
-                            geometry: {
-                                '$ref': '#/components/schemas/geometryGeoJSON'
-                            },
-                            properties: {
-                                type: 'object',
-                                nullable: true
-                            },
-                            id: {
-                                oneOf: [{ type: 'string' }, { type: 'integer' }]
-                            }
-                        }
-                    },
-*/
                     geometryGeoJSON: {
                         type: 'object',
                         required: [ 'type' ],
@@ -305,16 +282,15 @@ export class OpenAPI {
                             }
                         }
                     }
-                },
-                tags: [{
-                    name: 'Capabilities',
-                    description: 'Essential characteristics of this API including information about the data'
-                }, {
-                    name: 'Features',
-                    description: 'Access to data (features).'
-                }]
-            }
- 
+                }
+            },
+            tags: [{
+                name: 'Capabilities',
+                description: 'Essential characteristics of this API including information about the data'
+            }, {
+                name: 'Features',
+                description: 'Access to data (features).'
+            }]
         };
 
         function formulateResponse(description, jsonSchema) {
@@ -384,7 +360,7 @@ export class OpenAPI {
                         default: formulateResponse('an error occurred', '#/components/schemas/exception')
                     }
                 }
-             };
+            };
 
             ret.paths['/collections/'+collection.name+'/items'] = {
                 get: {
@@ -392,6 +368,7 @@ export class OpenAPI {
                     description: collection.description,
                     operationId: 'getFeatures',
                     tags: [ 'Features' ],
+                    
                     parameters: [{
                         '$ref': '#/components/parameters/limit'
                     },{
