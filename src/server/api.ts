@@ -2,8 +2,12 @@ import {Server} from './server';
 import {FilterProvider} from './filter_provider';
 import {Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
 
+import { OpenAPI } from './openapi';
+
 import * as _ from 'lodash';
 import * as express from 'express';
+
+
 
 import {filterProviders} from './filters/';
 
@@ -18,7 +22,8 @@ export interface APIResponse {
 };
 
 export interface RequestParameters {
-    baseUrl : string;
+    baseUrl : string; // 'https://foo.com:1234/my-server/sofp'
+    basePath : string;  // '/my-server/sofp'
     query? : Map<string, string>;
     body? : Buffer;
     collection? : Collection;
@@ -71,7 +76,7 @@ export class API {
     }
 
     connectExpress(app: express) : void {
-        let getBaseUrl = (req: express.req) : string => {
+        let produceRequestParameters = (req: express.req) : RequestParameters => {
             let protocol = req.headers['x-forwarded-proto'] || req.protocol;
             let host = req.headers['x-forwarded-host'];
             if (host) {
@@ -82,16 +87,19 @@ export class API {
                 host = req.headers.host;
             }
             let contextPath = deduceContextPath(this.contextPath, req.headers['x-forwarded-path']);
-            let ret = protocol + '://' + host + contextPath;
+            let ret = {
+                baseUrl: protocol + '://' + host + contextPath,
+                basePath: contextPath
+            };
             return ret;
         }
         app.get(this.contextPath, (req, res) => {
-            let response = this.getApiLandingPage({ baseUrl: getBaseUrl(req) });
+            let response = this.getApiLandingPage(produceRequestParameters(req));
             res.json(response);
         });
 
         app.get(this.contextPath + 'collections', (req, res) => {
-            let response = this.getFeatureCollectionsMetadata({ baseUrl: getBaseUrl(req) });
+            let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req));
             res.json(response);
         });
 
@@ -101,7 +109,7 @@ export class API {
                 return next();
             }
             
-            let response = this.getFeatureCollectionsMetadata({ baseUrl: getBaseUrl(req) }, collection);
+            let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req), collection);
             res.json(response);
         });
 
@@ -119,11 +127,9 @@ export class API {
             };
 
             const stream : FeatureStream = collection.executeQuery(query);
-            var params : RequestParameters = {
-                baseUrl: getBaseUrl(req),
-                collection: collection,
-                itemQuery: query
-            };
+            var params : RequestParameters = produceRequestParameters(req);
+            params.collection = collection;
+            params.itemQuery = query;
             this.produceOutput(params, stream, res);
         });
 
@@ -141,8 +147,14 @@ export class API {
             });
         });
 
+        app.get(this.contextPath + 'api', (req, res) => {
+            let openapi = new OpenAPI(this, produceRequestParameters(req));
+            res.header('Content-Type', 'application/openapi+json;version=3.0');
+            res.end(openapi.serialize());
+        });
+
         app.get(this.contextPath + 'conformance', (req, res) => {
-            let response = this.getConformancePage({ baseUrl: getBaseUrl(req) });
+            let response = this.getConformancePage(produceRequestParameters(req));
             res.json(response);
         });
     }

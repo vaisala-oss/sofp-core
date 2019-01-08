@@ -16,7 +16,7 @@ const MockServer = jest.fn<Server>(() => ({
  **/
 test('Content specific tests for requirement 2: /req/core/root-success', () => {
     let api = new API(new MockServer(), { contextPath: '' });
-    let response = api.getApiLandingPage({ baseUrl: 'http://foo.com:1024' });
+    let response = api.getApiLandingPage({ baseUrl: 'http://foo.com:1024', basePath: '/' });
 
     // Links are mandatory
     expect(response.links).toBeInstanceOf(Array);
@@ -38,7 +38,7 @@ test('Content specific tests for requirement 2: /req/core/root-success', () => {
  **/
 test('Content specific tests for requirement 10: /req/core/fc-md-success', () => {
     let api = new API(new MockServer(), { contextPath: '' });
-    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024' });
+    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024', basePath: '/' });
 
     // Links and collections are mandatory
     expect(response.links).toBeInstanceOf(Array);
@@ -53,7 +53,7 @@ test('Content specific tests for requirement 10: /req/core/fc-md-success', () =>
  **/
 test('Content specific tests for requirement 11: /req/core/fc-md-links', () => {
 let api = new API(new MockServer(), { contextPath: '' });
-    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024' });
+    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024', basePath: '/' });
 
     let self = _.find(response.links, l => l.rel === 'self');
     expect(self).toBeDefined();
@@ -82,7 +82,7 @@ test('Server collection response should only include API fields, not "private" f
 
 
     let api = new API(new MockServer2(), { contextPath: '' });
-    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024' });
+    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024', basePath: '/' });
     expect(response.collections).toBeInstanceOf(Array);
     expect(response.collections.length).toBe(1);
 
