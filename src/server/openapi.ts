@@ -1,5 +1,5 @@
 import { API, RequestParameters } from './api';
-import { Collection } from 'sofp-lib';
+import { Collection, Property } from 'sofp-lib';
 
 import * as yaml from 'js-yaml';
 
@@ -344,8 +344,6 @@ export class OpenAPI {
 
         const collections : Collection[] = this.api.server.getCollections();
         _.each(collections, (collection : Collection) => {
-            console.log(collection);
-
             const featureCollectionSchemaName = collection.name+'FeatureCollectionGeoJSON';
             const featureSchemaName = collection.name+'FeatureGeoJSON';
 
@@ -362,6 +360,29 @@ export class OpenAPI {
                 }
             };
 
+            var parameters : any[] = [{
+                '$ref': '#/components/parameters/limit'
+            },{
+                '$ref': '#/components/parameters/bbox'
+            },{
+                '$ref': '#/components/parameters/time'
+            }];
+
+            _.each(collection.properties, (p : Property) => {
+                var prop : any = {
+                    name: p.name,
+                    in: 'query',
+                    schema: { type: p.type },
+                    required: false
+                };
+
+                if (p.description) {
+                    prop.description = p.description;
+                }
+
+                parameters.push(prop);
+            });
+
             ret.paths['/collections/'+collection.name+'/items'] = {
                 get: {
                     summary: 'retrieve features of '+collection.name+' feature collection',
@@ -369,13 +390,7 @@ export class OpenAPI {
                     operationId: 'getFeatures',
                     tags: [ 'Features' ],
                     
-                    parameters: [{
-                        '$ref': '#/components/parameters/limit'
-                    },{
-                        '$ref': '#/components/parameters/bbox'
-                    },{
-                        '$ref': '#/components/parameters/time'
-                    }], // TODO: add schema properties as parameters
+                    parameters: parameters,
                     responses: {
                         '200': formulateResponse('Information about the feature collection plus the first features matching the selection parameters.', 
                             '#/components/schemas/' + featureCollectionSchemaName),
@@ -423,10 +438,7 @@ export class OpenAPI {
                     geometry: {
                         '$ref': '#/components/schemas/geometryGeoJSON'
                     },
-                    properties: { // TODO: insert actual schema
-                        type: 'object',
-                        nullable: true
-                    },
+                    properties: _.reduce(collection.properties, (memo, p) => { memo[p.name] = { type: p.type }; return memo; }, {}),
                     id: {
                         oneOf: [{ type: 'string' }, { type: 'integer' }]
                     }
