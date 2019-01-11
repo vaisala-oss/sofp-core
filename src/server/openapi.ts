@@ -438,7 +438,10 @@ export class OpenAPI {
                     geometry: {
                         '$ref': '#/components/schemas/geometryGeoJSON'
                     },
-                    properties: _.reduce(collection.properties, (memo, p) => { memo[p.name] = { type: p.type }; return memo; }, {}),
+                    properties: {
+                        type: 'object',
+                        properties: _.reduce(collection.properties, (memo, p) => { memo[p.name] = { type: p.type }; return memo; }, {}),
+                    },
                     id: {
                         oneOf: [{ type: 'string' }, { type: 'integer' }]
                     }
