@@ -1,4 +1,4 @@
-import {Feature, Filter} from 'sofp-lib';
+import {Feature, Filter, Collection} from 'sofp-lib';
 import {FilterProvider} from '../filter_provider';
 
 import * as moment from 'moment';
@@ -91,7 +91,7 @@ export class TimeFilterProvider implements FilterProvider {
         this.options.acceptFeaturesWithNoTimeField = acceptFeaturesWithNoTimeField;
     }
 
-    parseFilter(req : express.Request) : Filter {
+    parseFilter(req : express.Request, collection : Collection) : Filter {
         if (req.query.time) {
             return new TimeFilter(req.query.time, this.options);
         }

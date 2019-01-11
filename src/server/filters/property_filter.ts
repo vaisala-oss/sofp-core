@@ -1,4 +1,4 @@
-import {Feature, Filter} from 'sofp-lib';
+import {Feature, Filter, Collection} from 'sofp-lib';
 import {FilterProvider} from '../filter_provider';
 
 import * as express from 'express';
@@ -31,11 +31,12 @@ class PropertyFilter implements Filter {
 const reservedParameterNames = [ 'nexttoken', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
 
 export class PropertyFilterProvider implements FilterProvider {
-    parseFilter(req : express.Request) : Filter {
+    parseFilter(req : express.Request, collection : Collection) : Filter {
         var properties = {};
+        const lowerCasePropertyNames = _.map(collection.properties, (p) => p.name.toLowerCase() );
         _.each(req.query, (v, k) => {
             k = k.toLowerCase();
-            if (reservedParameterNames.indexOf(k) === -1) {
+            if (reservedParameterNames.indexOf(k) === -1 && lowerCasePropertyNames.indexOf(k) !== -1) {
                 properties[k] = v;
             }
         });

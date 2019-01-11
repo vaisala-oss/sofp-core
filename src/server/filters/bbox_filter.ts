@@ -1,4 +1,4 @@
-import {Feature, Filter} from 'sofp-lib';
+import {Feature, Filter, Collection} from 'sofp-lib';
 import {FilterProvider} from '../filter_provider';
 
 import * as _ from 'lodash';
@@ -49,7 +49,7 @@ class BBOXFilter implements Filter {
 }
 
 export class BBOXFilterProvider implements FilterProvider {
-    parseFilter(req : express.Request) : Filter {
+    parseFilter(req : express.Request, collection : Collection) : Filter {
         if (_.isString(req.query['bbox'])) {
             return new BBOXFilter(req.query['bbox'], req.query['bbox-crs']);
         }

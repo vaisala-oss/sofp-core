@@ -119,7 +119,7 @@ export class API {
                 return next();
             }
             
-            let filters = this.parseFilters(req);
+            let filters = this.parseFilters(req, collection);
             const query : Query = {
                 limit:     req.query.limit ? Number(req.query.limit) : 10,
                 nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
@@ -159,8 +159,8 @@ export class API {
         });
     }
 
-    parseFilters(req : express.Request) : Filter[] {
-        return _.map(filterProviders, fp => fp.parseFilter(req)).filter(_.isObject);
+    parseFilters(req : express.Request, collection : Collection) : Filter[] {
+        return _.map(filterProviders, fp => fp.parseFilter(req, collection)).filter(_.isObject);
     }
 
     /**
