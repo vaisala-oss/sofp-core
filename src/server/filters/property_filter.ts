@@ -16,7 +16,10 @@ class PropertyFilter implements Filter {
             return false;
         }
         // Note that the type-agnostic comparator (!=) is used here for a reason
-        if (_.find(this.parameters.properties, (v, k) => f.properties[k] != v)) {
+        if (_.find(this.parameters.properties, (v, k) => {
+            var featurePropertyKey = _.find(_.keys(f.properties), key => key.toLowerCase() === k);
+            return !!featurePropertyKey && f.properties[featurePropertyKey] != v;
+        })) {
             return false;
         }
         return true;
