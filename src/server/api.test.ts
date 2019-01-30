@@ -21,16 +21,19 @@ test('Content specific tests for requirement 2: /req/core/root-success', () => {
     // Links are mandatory
     expect(response.links).toBeInstanceOf(Array);
 
-    let linksByRel = _.reduce(response.links, (memo, link) => { memo[link.rel] = link; return memo; }, {});
+    let linksByRel = _.reduce(response.links, (memo, link) => { memo[link.rel+'-'+link.type] = link; return memo; }, {});
 
-    expect(linksByRel['service']).toBeDefined();
-    expect(linksByRel['service'].href).toBe('http://foo.com:1024/api');
+    expect(linksByRel['service-application/openapi+json;version=3.0']).toBeDefined();
+    expect(linksByRel['service-application/openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api.json');
 
-    expect(linksByRel['conformance']).toBeDefined();
-    expect(linksByRel['conformance'].href).toBe('http://foo.com:1024/conformance');
+    expect(linksByRel['service-application/openapi+yaml;version=3.0']).toBeDefined();
+    expect(linksByRel['service-application/openapi+yaml;version=3.0'].href).toBe('http://foo.com:1024/api.yaml');
 
-    expect(linksByRel['data']).toBeDefined();
-    expect(linksByRel['data'].href).toBe('http://foo.com:1024/collections');
+    expect(linksByRel['conformance-application/json']).toBeDefined();
+    expect(linksByRel['conformance-application/json'].href).toBe('http://foo.com:1024/conformance');
+
+    expect(linksByRel['data-application/json']).toBeDefined();
+    expect(linksByRel['data-application/json'].href).toBe('http://foo.com:1024/collections');
 });
 
 /**
