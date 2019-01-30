@@ -452,8 +452,14 @@ export class OpenAPI {
         return ret;
     }
 
-    serialize() {
+    serialize(format) {
         let obj = this.getObject();
-        return yaml.dump(obj);
+        if (format === 'yaml') {
+            return yaml.dump(obj);
+        } else if (format === 'json') {
+            return obj;
+        } else {
+            new Error('cannot serialize format '+format);
+        }
     }
 };

@@ -147,11 +147,18 @@ export class API {
             });
         });
 
-        app.get(this.contextPath + 'api', (req, res) => {
+        app.get(this.contextPath + 'api.yaml', (req, res) => {
+            let openapi = new OpenAPI(this, produceRequestParameters(req));
+            res.header('Content-Type', 'application/openapi+yaml;version=3.0');
+            res.end(openapi.serialize('yaml'));
+        });
+
+        app.get(this.contextPath + 'api.json', (req, res) => {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
             res.header('Content-Type', 'application/openapi+json;version=3.0');
-            res.end(openapi.serialize());
+            res.json(openapi.serialize('json'));
         });
+
 
         app.get(this.contextPath + 'conformance', (req, res) => {
             let response = this.getConformancePage(produceRequestParameters(req));
@@ -176,9 +183,14 @@ export class API {
                 type: 'application/json',
                 title: this.title
             },{
-                href: params.baseUrl + '/api',
+                href: params.baseUrl + '/api.json',
                 rel: 'service',
                 type: 'application/openapi+json;version=3.0',
+                title: 'the API definition',
+            },{
+                href: params.baseUrl + '/api.yaml',
+                rel: 'service',
+                type: 'application/openapi+yaml;version=3.0',
                 title: 'the API definition',
             },{
                 href: params.baseUrl + '/conformance',
