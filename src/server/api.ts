@@ -7,6 +7,7 @@ import { OpenAPI } from './openapi';
 import * as _ from 'lodash';
 import * as express from 'express';
 
+import { json2html } from './json2html';
 
 
 import {filterProviders} from './filters/';
@@ -93,14 +94,25 @@ export class API {
             };
             return ret;
         }
+
+        let sendResponse = (req : express.req, res, jsonResponse) => {
+            let html = req.query.f === 'html';
+            if (html) {
+                res.header('Content-Type', 'text/html');
+                res.end(json2html(jsonResponse));
+            } else {
+                res.json(jsonResponse);
+            }
+        }
+
         app.get(this.contextPath, (req, res) => {
             let response = this.getApiLandingPage(produceRequestParameters(req));
-            res.json(response);
+            sendResponse(req, res, response);
         });
 
         app.get(this.contextPath + 'collections', (req, res) => {
             let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req));
-            res.json(response);
+            sendResponse(req, res, response);
         });
 
         app.get(this.contextPath + 'collections/:name', (req, res, next) => {
@@ -110,7 +122,12 @@ export class API {
             }
             
             let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req), collection);
-            res.json(response);
+            sendResponse(req, res, response);
+        });
+
+        app.get(this.contextPath + 'conformance', (req, res) => {
+            let response = this.getConformancePage(produceRequestParameters(req));
+            sendResponse(req, res, response);
         });
 
         app.get(this.contextPath + 'collections/:name/items', (req, res, next) => {
@@ -157,12 +174,6 @@ export class API {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
             res.header('Content-Type', 'application/openapi+json;version=3.0');
             res.json(openapi.serialize('json'));
-        });
-
-
-        app.get(this.contextPath + 'conformance', (req, res) => {
-            let response = this.getConformancePage(produceRequestParameters(req));
-            res.json(response);
         });
     }
 
