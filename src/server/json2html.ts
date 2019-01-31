@@ -25,7 +25,7 @@ function produceBody(title, data) {
         ret += _.map(data.collections, c => {
             var tmp = `<h3>${c.name}</h3>`;
             tmp += `<p>${c.description}</p>`;
-            tmp += `<h4>${c.description}</h4>`;
+            tmp += `<h4>Links for the collection</h4>`;
             tmp += _.map(c.links, l => {
                 return `<p>${l.rel} = <a href="${l.href}">${l.title || '(no title)'}</a> (${l.type})</p>`;
             }).join('');
