@@ -56,7 +56,11 @@ function produceBody(title, data) {
 export function json2html(data) {
     var html = '<!DOCTYPE html><html>';
 
-    var title = (_.find(data.links, { rel : 'self'}) || {}).title || '??';
+    var title = '??';
+    var self = _.find(data.links, { rel : 'self'});
+    if (self && self['title']) {
+        title = self['title'];
+    }
 
     html += '<head>';
     html += `<title>${escapeXml(title)}</title>`;
