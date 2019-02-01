@@ -96,13 +96,31 @@ export class API {
         }
 
         let sendResponse = (req : express.req, res, jsonResponse) => {
-            let html = req.query.f === 'html';
-            if (html) {
+            // select output format, query parameter 'f' value is primary, accept text/html secondayr, json is default
+            let acceptsHtml = (req.headers['accept'] || '').toLowerCase().split(',').indexOf('text/html') !== -1;
+            let requestedFormat = (req.query['f'] || '').toLowerCase();
+
+            let format;
+
+            if (requestedFormat === 'html') {
+                format = 'HTML';
+            } else if (acceptsHtml && requestedFormat === '') {
+                format = 'HTML';
+            } else {
+                format = 'JSON';
+            }
+
+            if (format === 'HTML') {
                 res.header('Content-Type', 'text/html');
                 res.end(json2html(jsonResponse));
-            } else {
-                res.json(jsonResponse);
+                return;
             }
+
+            if (format === 'JSON') {
+                res.json(jsonResponse);
+                return;
+            }
+            new Error(`Programming error, format was set to '${format}' instead of 'JSON' or 'HTML'`);
         }
 
         app.get(this.contextPath, (req, res) => {
@@ -253,7 +271,8 @@ export class API {
             conformsTo: [
                 'http://www.opengis.net/spec/wfs-1/3.0/req/core',
                 'http://www.opengis.net/spec/wfs-1/3.0/req/oas30',
-                'http://www.opengis.net/spec/wfs-1/3.0/req/geojson' ]
+                'http://www.opengis.net/spec/wfs-1/3.0/req/geojson',
+                'http://www.opengis.net/spec/wfs-1/3.0/req/html' ]
         };
     }
 
@@ -261,7 +280,7 @@ export class API {
         var n = 0;
         var lastItem : Item = undefined;
         function startResponse(res) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.writeHead(200, { 'Content-Type': 'application/geo+json' });
             res.write('{\n');
             res.write('\t"type": "FeatureCollection",\n');
             res.write('\t"features": [');

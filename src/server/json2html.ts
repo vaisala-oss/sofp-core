@@ -48,7 +48,7 @@ function produceBody(title, data) {
     }
 
     ret += '<h2>Raw JSON output</h2>';
-    ret += `<textarea cols="80" rows="15">${escapeXml(JSON.stringify(data, null, 4))}</textarea>`;
+    ret += `<textarea cols="80" rows="15">${escapeXml(JSON.stringify(data, null, 2))}</textarea>`;
 
     return ret;
 }
