@@ -7,7 +7,7 @@ import * as express from 'express';
 import * as _ from 'lodash';
 
 class TimeFilter implements Filter {
-    filterClass : String = 'TimeFilter';
+    filterClass : string = 'TimeFilter';
     parameters = {
         timeString: null,
         momentStart: null,
@@ -15,7 +15,7 @@ class TimeFilter implements Filter {
         duration: null
     };
     options : object;
-    asQuery : String;
+    asQuery : string;
 
     accept = function(f : Feature) {
         var propertiesAsMoments = _.reduce(f.properties, (memo, v, k) => {

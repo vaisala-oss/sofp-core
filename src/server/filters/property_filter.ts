@@ -5,11 +5,11 @@ import * as express from 'express';
 import * as _ from 'lodash';
 
 class PropertyFilter implements Filter {
-    filterClass : String = 'PropertyFilter';
+    filterClass : string = 'PropertyFilter';
     parameters = {
         properties: null
     };
-    asQuery : String;
+    asQuery : string;
 
     accept = function(f : Feature) {
         if (!f.properties && _.size(this.parameters.properties) > 0) {
