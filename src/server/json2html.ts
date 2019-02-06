@@ -23,7 +23,12 @@ function produceBody(title, data) {
     if (data.collections) {
         ret += '<h2>Collections</h2>';
         ret += _.map(data.collections, c => {
-            var tmp = `<h3>${c.name}</h3>`;
+            var tmp = '';
+            if (c.title) {
+                tmp += `<h3>${c.title} (${c.name})</h3>`;
+            } else {
+                tmp += `<h3>${c.name}</h3>`;
+            }
             tmp += `<p>${c.description}</p>`;
             tmp += `<h4>Links for the collection</h4>`;
             tmp += _.map(c.links, l => {

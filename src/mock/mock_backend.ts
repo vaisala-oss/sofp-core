@@ -4,6 +4,7 @@ let MockBackend = new Backend('MockBackend');
 
 class FooCollection implements Collection {
     name : string = 'foo';
+    title : string = 'The Great Foo';
     description : string = 'This is a collection called Foo containing multiple Foos that are bar';
     links : Link[] = [{
         href:     'https://www.spatineo.com',
