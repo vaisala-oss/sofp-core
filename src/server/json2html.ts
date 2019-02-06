@@ -48,7 +48,7 @@ function produceBody(title, data) {
     if (data.links) {
         ret += '<h2>Links</h2>';
         ret += _.map(data.links, l => {
-            return `<p>${l.rel} = <a href="${l.href}">${l.title}</a> (${l.type})</p>`;
+            return `<p>${l.rel} = <a href="${l.href}">${l.title || '(no title)'}</a> (${l.type})</p>`;
         } ).join('');
     }
 
