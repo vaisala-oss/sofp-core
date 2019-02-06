@@ -191,9 +191,16 @@ test('Test filter with multiple timefields, all within filter bounds => accept' 
     expect(filter.accept(feature)).toBeTruthy();
 });
 
-test('Test filter with multiple timefields, one outside filter bounds => accept' , () => {
+test('Test filter with multiple timefields, one outside filter bounds => reject' , () => {
     let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
 
     let feature = { properties: { timeField1: '2018-01-01T06:10:42Z', timeField2: '2017-01-01T09:11:22Z' } };
     expect(filter.accept(feature)).toBeFalsy();
+});
+
+test('Test filter with multiple timefields, one outside filter bounds but only one is set as a timefield => accept' , () => {
+    let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, { timePropertyNames: ['within'] });
+
+    let feature = { properties: { within: '2018-01-01T06:10:42Z', outside: '2017-01-01T09:11:22Z' } };
+    expect(filter.accept(feature)).toBeTruthy();
 });
