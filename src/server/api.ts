@@ -258,7 +258,8 @@ export class API {
             collection.links.unshift({
                 href: params.baseUrl + '/collections/'+collection.name+'/items',
                 rel: 'item',
-                type: 'application/json'
+                type: 'application/json',
+                title: collection.title
             });
         });
 
