@@ -282,7 +282,9 @@ export class API {
         var n = 0;
         var lastItem : Item = undefined;
         function startResponse(res) {
-            res.writeHead(200, { 'Content-Type': 'application/geo+json' });
+            res.writeHead(200, {
+                'Content-Type': 'application/geo+json',
+                'Access-Control-Allow-Origin': '*' });
             res.write('{\n');
             res.write('\t"type": "FeatureCollection",\n');
             res.write('\t"features": [');
