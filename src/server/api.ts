@@ -117,6 +117,7 @@ export class API {
             }
 
             if (format === 'JSON') {
+                res.header('Access-Control-Allow-Origin', '*');
                 res.json(jsonResponse);
                 return;
             }
