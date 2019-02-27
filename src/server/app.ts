@@ -17,7 +17,7 @@ import * as fs from 'fs';
 
 const program = commander
   .command('sofp-core')
-  .usage('[options] <file ...>')
+  .usage('[options] <path-to-backend ...>')
   .option('-p, --port [number]', 'Port number to listen (default 3000)')
   .option('-c, --contextPath [path]', 'Context path for the server (default /sofp)')
   .option('-a, --accessLog [file]', 'Write access log to file (default: no log)')
