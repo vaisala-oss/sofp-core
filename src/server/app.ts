@@ -11,19 +11,34 @@ import * as http from 'http';
 
 import * as BackendLoader from './backend_loader';
 
-const serverPort = 3000;
+import * as commander from 'commander';
+import * as morgan from 'morgan';
+import * as fs from 'fs';
+
+const program = commander
+  .command('sofp-core')
+  .usage('[options] <file ...>')
+  .option('-p, --port [number]', 'Port number to listen (default 3000)')
+  .option('-c, --contextPath [path]', 'Context path for the server (default /sofp)')
+  .option('-a, --accessLog [file]', 'Write access log to file (default: no log)')
+  .parse(process.argv);
+
+const serverPort = program.port || 3000;
+
+console.log('args', program.args);
+console.log('backends', program.backends);
 
 var backends;
-if (process.argv.length > 2) {
+if (program.args) {
     // Load backends from command line paths. Useful when developing a backend
     backends = [];
-    for (var i = 2; i < process.argv.length; i++) {
-        var dir = process.argv[i];
+    _.each(program.args, b => {
+        var dir = b;
         if (dir[0] !== '/') {
             dir = process.cwd() + '/' + dir;
         }
         _.each(BackendLoader.loadModule(dir), backend => backends.push(backend));
-    }
+    });
 } else {
     backends = BackendLoader.load('backends/');
     if (backends.length === 0) {
@@ -34,13 +49,21 @@ if (process.argv.length > 2) {
 
 const server = new Server(backends);
 
-const api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: '/sofp' });
+const api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: program.contextPath || '/sofp' });
 
 const app = express();
+
+if (program.accessLog) {
+    console.log('Writing access log to', program.accessLog)
+    var accessLogStream = fs.createWriteStream(program.accessLog, { flags: 'a' })
+    app.use(morgan('combined', { stream: accessLogStream }));
+}
+
 // Pretty-print
 app.set('json spaces', 2);
 
 api.connectExpress(app);
+
 
 app.use((req, res) => {
     res.status(404).json({message: 'Not found'});
