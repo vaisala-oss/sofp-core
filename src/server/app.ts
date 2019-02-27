@@ -25,11 +25,8 @@ const program = commander
 
 const serverPort = program.port || 3000;
 
-console.log('args', program.args);
-console.log('backends', program.backends);
-
 var backends;
-if (program.args) {
+if (program.args.length > 0) {
     // Load backends from command line paths. Useful when developing a backend
     backends = [];
     _.each(program.args, b => {
