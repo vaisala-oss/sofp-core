@@ -34,6 +34,7 @@
 		"moment": "~2.22.2",
 		"moment-isoduration": "0.0.3",
 		"morgan": "^1.9.1",
+		"rotating-file-stream": "^1.4.0",
 		"sofp-lib": "0.2.2"
 	},
 	"devDependencies": {

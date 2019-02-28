@@ -13,6 +13,8 @@ import * as BackendLoader from './backend_loader';
 
 import * as commander from 'commander';
 import * as morgan from 'morgan';
+import RotatingFileStream from 'rotating-file-stream';
+import * as path from 'path';
 import * as fs from 'fs';
 
 const program = commander
@@ -51,8 +53,12 @@ const api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: program
 const app = express();
 
 if (program.accessLog) {
-    console.log('Writing access log to', program.accessLog)
-    var accessLogStream = fs.createWriteStream(program.accessLog, { flags: 'a' })
+    console.log('Writing access log to', program.accessLog, '(rotate daily)')
+    var accessLogStream = RotatingFileStream(path.basename(program.accessLog), {
+      interval: '1d', // rotate daily
+      path: path.dirname(program.accessLog)
+    });
+
     app.use(morgan('combined', { stream: accessLogStream }));
 }
 
