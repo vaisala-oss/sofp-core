@@ -467,6 +467,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-ss { color: #0000FF } /* Literal.String.Symbol */
 .listingblock .pygments .tok-il { color: #0000FF } /* Literal.Number.Integer.Long */
 
-textarea{font-family:monospace;}
+textarea{font-family:monospace; margin-bottom: 3em;}
 
 #mapid { height: 30em; }
