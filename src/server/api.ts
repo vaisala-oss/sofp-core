@@ -9,6 +9,7 @@ import * as express from 'express';
 
 import { json2html } from './json2html';
 
+import { geojson2html } from './geojson2html';
 
 import {filterProviders} from './filters/';
 
@@ -29,6 +30,7 @@ export interface RequestParameters {
     body? : Buffer;
     collection? : Collection;
     itemQuery? : Query;
+    responseFormat? : "JSON" | "HTML"; // Default to JSON
 };
 
 export interface APIParameters {
@@ -76,6 +78,23 @@ export class API {
         }
     }
 
+    identifyResponseFormat(req : express.req) {
+        // select output format, query parameter 'f' value is primary, accept text/html secondayr, json is default
+        let acceptsHtml = (req.headers['accept'] || '').toLowerCase().split(',').indexOf('text/html') !== -1;
+        let requestedFormat = (req.query['f'] || '').toLowerCase();
+
+        let format;
+
+        if (requestedFormat === 'html') {
+            format = 'HTML';
+        } else if (acceptsHtml && requestedFormat === '') {
+            format = 'HTML';
+        } else {
+            format = 'JSON';
+        }
+        return format;
+    }
+
     connectExpress(app: express) : void {
         let produceRequestParameters = (req: express.req) : RequestParameters => {
             let protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -88,27 +107,16 @@ export class API {
                 host = req.headers.host;
             }
             let contextPath = deduceContextPath(this.contextPath, req.headers['x-forwarded-path']);
-            let ret = {
+            let ret : RequestParameters = {
                 baseUrl: protocol + '://' + host + contextPath,
-                basePath: contextPath
+                basePath: contextPath,
+                responseFormat: this.identifyResponseFormat(req)
             };
             return ret;
         }
 
         let sendResponse = (req : express.req, res, jsonResponse) => {
-            // select output format, query parameter 'f' value is primary, accept text/html secondayr, json is default
-            let acceptsHtml = (req.headers['accept'] || '').toLowerCase().split(',').indexOf('text/html') !== -1;
-            let requestedFormat = (req.query['f'] || '').toLowerCase();
-
-            let format;
-
-            if (requestedFormat === 'html') {
-                format = 'HTML';
-            } else if (acceptsHtml && requestedFormat === '') {
-                format = 'HTML';
-            } else {
-                format = 'JSON';
-            }
+            const format = this.identifyResponseFormat(req);
 
             if (format === 'HTML') {
                 res.header('Content-Type', 'text/html');
@@ -278,9 +286,20 @@ export class API {
         };
     }
 
-    produceOutput(params : RequestParameters, stream : FeatureStream, res : express.Response) {
+    produceOutput(params : RequestParameters, stream : FeatureStream, response : express.Response) {
         var n = 0;
         var lastItem : Item = undefined;
+
+        let res : express.Response | geojson2html;
+
+        if (params.responseFormat === 'HTML') {
+            res = new geojson2html(response, params.collection);
+        } else if (params.responseFormat === 'JSON' || params.responseFormat === undefined) {
+            res = response;
+        } else {
+            throw Error('Unknown response format '+params.responseFormat);
+        }
+
         function startResponse(res) {
             res.writeHead(200, {
                 'Content-Type': 'application/geo+json',
