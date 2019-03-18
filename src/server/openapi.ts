@@ -1,6 +1,9 @@
 import { API, RequestParameters } from './api';
 import { Collection, Property } from 'sofp-lib';
 
+import * as widdershins from 'widdershins';
+import * as shins from 'shins';
+
 import * as yaml from 'js-yaml';
 
 import * as _ from 'lodash';
@@ -452,12 +455,50 @@ export class OpenAPI {
         return ret;
     }
 
-    serialize(format) {
+    async serialize(format) {
         let obj = this.getObject();
+        console.log('format', format);
         if (format === 'yaml') {
             return yaml.dump(obj);
         } else if (format === 'json') {
             return obj;
+        } else if (format === 'html') {
+
+            const widderShinsOptions = {
+                codeSamples: true,
+                httpsnippet: false,
+                templateCallback: function(templateName,stage,data) { return data },
+                theme: 'darkula',
+                search: true,
+                samle: true,
+                includes: [],
+                shallowSchemas: false,
+                tocSummary: false,
+                headings: 2,
+                yaml: false
+            };
+
+            const shinsOptions = {
+                cli: false,
+                minify: false,
+                customCss: false,
+                inline: true,
+                unsafe: false,
+                'no-links': false
+            };
+            const shins = require('shins');
+
+            return new Promise((resolve, reject) => {
+                widdershins.convert(obj,widderShinsOptions,function(err,markdown){
+                    if (err) { return reject(err); }
+
+                    shins.render(markdown, shinsOptions, function(err, html) {
+                        if (err) { return reject(err); }
+                        resolve(html);
+                    });
+                });
+            });
+
         } else {
             new Error('cannot serialize format '+format);
         }

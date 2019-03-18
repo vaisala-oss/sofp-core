@@ -191,16 +191,39 @@ export class API {
             });
         });
 
-        app.get(this.contextPath + 'api.yaml', (req, res) => {
+        app.get(this.contextPath + 'api.yaml', async (req, res, next) => {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
-            res.header('Content-Type', 'application/openapi+yaml;version=3.0');
-            res.end(openapi.serialize('yaml'));
+            try {
+                const response = await openapi.serialize('yaml');
+                res.header('Content-Type', 'application/openapi+yaml;version=3.0');
+                res.end(response);
+            } catch(e) {
+                next(e);
+            }
         });
 
-        app.get(this.contextPath + 'api.json', (req, res) => {
+        app.get(this.contextPath + 'api.json', async (req, res, next) => {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
-            res.header('Content-Type', 'application/openapi+json;version=3.0');
-            res.json(openapi.serialize('json'));
+            try {
+                const response = await openapi.serialize('json');
+                res.header('Content-Type', 'application/openapi+json;version=3.0');
+                res.json(response);
+            } catch(e) {
+                next(e);
+            }
+        });
+
+        app.get(this.contextPath + 'api.html', async (req, res, next) => {
+            let openapi = new OpenAPI(this, produceRequestParameters(req));
+            try {
+                const response = await openapi.serialize('html');
+                res.header('Content-Type', 'text/html');
+                res.end(response);
+            } catch(e) {
+                console.log('wwww');
+                next(e);
+            }
+
         });
     }
 
@@ -224,12 +247,17 @@ export class API {
                 href: params.baseUrl + '/api.json',
                 rel: 'service',
                 type: 'application/openapi+json;version=3.0',
-                title: 'the API definition',
+                title: 'the API definition (JSON)',
             },{
                 href: params.baseUrl + '/api.yaml',
                 rel: 'service',
                 type: 'application/openapi+yaml;version=3.0',
-                title: 'the API definition',
+                title: 'the API definition (YAML)',
+            },{
+                href: params.baseUrl + '/api.html',
+                rel: 'service',
+                type: 'text/html',
+                title: 'the API definition (HTML)',
             },{
                 href: params.baseUrl + '/conformance',
                 rel: 'conformance',
