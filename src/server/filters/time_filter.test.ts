@@ -131,6 +131,31 @@ test('Test duration with month', () => {
     expect(filter.parameters.duration.seconds()).toBe(12);
 });
 
+test('One hour duration', () => {
+    let filter = provider.parseFilter({ query: { time: '2019-04-11T00:00:00Z/PT1H' }}, {});
+    
+    expect(filter.parameters.momentStart.year()).toBe(2019);
+    expect(filter.parameters.momentStart.month()).toBe(3); // January = 0
+    expect(filter.parameters.momentStart.date()).toBe(11);
+    expect(filter.parameters.momentStart.hour()).toBe(0);
+    expect(filter.parameters.momentStart.minute()).toBe(0);
+    expect(filter.parameters.momentStart.second()).toBe(0);
+
+    expect(filter.parameters.momentEnd.year()).toBe(2019);
+    expect(filter.parameters.momentEnd.month()).toBe(3); // January = 0
+    expect(filter.parameters.momentEnd.date()).toBe(11);
+    expect(filter.parameters.momentEnd.hour()).toBe(1);
+    expect(filter.parameters.momentEnd.minute()).toBe(0);
+    expect(filter.parameters.momentEnd.second()).toBe(0);
+
+    expect(filter.parameters.duration.months()).toBe(0);
+    expect(filter.parameters.duration.days()).toBe(0);
+    expect(filter.parameters.duration.hours()).toBe(1);
+    expect(filter.parameters.duration.minutes()).toBe(0);
+    expect(filter.parameters.duration.seconds()).toBe(0);
+});
+
+
 
 test('Test filter (not accept 1s before exact start date)', () => {
     let filter = provider.parseFilter({ query: { time: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
