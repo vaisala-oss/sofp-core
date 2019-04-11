@@ -91,10 +91,10 @@ export class OpenAPI {
                             maxItems: 4, // 6
                             items: {
                               type: 'number'
-                            },
-                            style: 'form',
-                            explode: false
-                        }
+                            }
+                        },
+                        style: 'form',
+                        explode: false
                     },
                     // 'bbox-crs': { }, // TODO:
                     time: {
@@ -115,7 +115,7 @@ export class OpenAPI {
                         required: false,
                         schema: { type: 'string' },
                         style: 'form',
-                        expolde: false
+                        explode: false
                     },
                     featureId: {
                         name: 'featureId',
@@ -354,7 +354,7 @@ export class OpenAPI {
                 get: {
                     summary: 'describe the buildings feature collection',
                     description: collection.description,
-                    operationId: 'describeCollection',
+                    operationId: 'describeCollection_'+collection.name,
                     tags: [ 'Capabilities' ],
                     responses: {
                         '200': formulateResponse('metadata about the '+collection.name+' collection shared by this API', '#/components/schemas/collectionInfo'),
@@ -390,7 +390,7 @@ export class OpenAPI {
                 get: {
                     summary: 'retrieve features of '+collection.name+' feature collection',
                     description: collection.description,
-                    operationId: 'getFeatures',
+                    operationId: 'getFeatures_'+collection.name,
                     tags: [ 'Features' ],
                     
                     parameters: parameters,
@@ -405,7 +405,7 @@ export class OpenAPI {
             ret.paths['/collections/'+collection.name+'/items/{featureId}'] = {
                 get: {
                     summary: 'retrieve single feature from feature collection '+collection.name,
-                    operationId: 'getFeature',
+                    operationId: 'getFeature_'+collection.name,
                     tags: [ 'Features' ],
                     parameters: [{
                         '$ref': '#/components/parameters/featureId'
