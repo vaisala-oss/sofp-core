@@ -18,4 +18,4 @@ To start the local image (removing the container when stopped):
 
 ## CI
 
-This project is using Semaphore CI: https://semaphoreci.com/spatineo/sofp-core
+This project is using Semaphore CI: https://semaphoreci.com/sampov2/sofp-core-2
