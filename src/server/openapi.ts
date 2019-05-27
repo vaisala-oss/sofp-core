@@ -514,8 +514,10 @@ export class OpenAPI {
                 customCss: false,
                 inline: true,
                 unsafe: false,
-                'no-links': false
+                'no-links': false,
+                logo: __dirname + '/../../logo.png'
             };
+
             const shins = require('shins');
 
             return new Promise((resolve, reject) => {
