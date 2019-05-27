@@ -515,7 +515,7 @@ export class OpenAPI {
                 inline: true,
                 unsafe: false,
                 'no-links': false,
-                logo: __dirname + '/../../logo.png'
+                logo: __dirname + '/../../assets/logo.png'
             };
 
             const shins = require('shins');

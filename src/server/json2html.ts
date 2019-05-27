@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 
-const css = fs.readFileSync('./assets/json2html.css');
+const css = fs.readFileSync(__dirname + '/../../assets/json2html.css');
 
 function escapeXml(unsafe) {
     return unsafe.replace(/[<>&'"]/g, function (c) {
@@ -45,9 +45,13 @@ function produceBody(title, data) {
         } ).join('');
     }
 
+    var selfLink;
     if (data.links) {
         ret += '<h2>Links</h2>';
         ret += _.map(data.links, l => {
+            if (l.rel === 'self') {
+                selfLink = l;
+            }
             return `<p>${l.rel} = <a href="${l.href}">${l.title || '(no title)'}</a> (${l.type})</p>`;
         } ).join('');
     }
@@ -55,10 +59,28 @@ function produceBody(title, data) {
     if (data.type === 'FeatureCollection') {
         ret += '<h2>Features</h2>';
         ret += '<div id="mapid"></div>';
+
     }
 
-    ret += '<h2>Raw JSON output</h2>';
-    ret += `<textarea cols="80" rows="15">${escapeXml(JSON.stringify(data, null, 2))}</textarea>`;
+    ret += '<h2>JSON output</h2>';
+
+    if (selfLink) {
+        var tmp = selfLink.href;
+        if (tmp.indexOf('?') === -1) {
+            tmp += '?f=json';
+        } else {
+            tmp += '&f=json';
+        }
+        ret += `<p>Get raw <a href="${tmp}">JSON</a></p>`;
+    }
+
+    ret += '<div id="jsonContainer"></div>';
+    ret += '<script>'
+    ret += 'var jsonData = '+JSON.stringify(data, null, 2)+';';
+    ret += 'renderjson.set_icons("+", "-");';
+    ret += 'renderjson.set_show_to_level(3);';
+    ret += 'document.getElementById("jsonContainer").appendChild(renderjson(jsonData));';
+    ret += '</script>'
 
     return ret;
 }
@@ -85,6 +107,7 @@ export function json2html(data, extraOptions?) {
     html += '<head>';
     html += `<title>${escapeXml(title)}</title>`;
     html += '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">';
+    html += '<script src="https://cdn.jsdelivr.net/npm/renderjson@1.4.0/renderjson.min.js"></script>';
 
     if (data.type === 'FeatureCollection') {
 
@@ -92,7 +115,6 @@ export function json2html(data, extraOptions?) {
 
         html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>';
         html += '<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.4.0/leaflet.js"></script>';
-
 
         html += '<script>'+
         'function popup(evt) {'+

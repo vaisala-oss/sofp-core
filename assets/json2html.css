@@ -470,3 +470,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 textarea{font-family:monospace; margin-bottom: 3em;}
 
 #mapid { height: 30em; }
+
+#jsonContainer .disclosure { font-weight: bold; text-decoration: none; }
+#jsonContainer .key     { color: #666; }
+#jsonContainer .string  { color: #191; }
+#jsonContainer .number  { color: #911; }
+#jsonContainer .boolean { color: #119; }
