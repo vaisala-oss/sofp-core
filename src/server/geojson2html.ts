@@ -19,8 +19,9 @@ export class geojson2html {
     }
 
     writeHead(statusCode : Number, headers : any) {
-        const modifiedHeaders = _.filter(headers, (k, v) => k.toLowerCase() !== 'content-type');
+        const modifiedHeaders = _.pickBy(headers, (v, k) => k.toLowerCase() !== 'content-type' );
         modifiedHeaders['Content-Type'] = 'text/html';
+
         this.response.writeHead(statusCode, modifiedHeaders);
     }
 

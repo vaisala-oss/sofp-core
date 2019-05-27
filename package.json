@@ -1,7 +1,7 @@
 {
 	"name": "sofp-core",
 	"description": "This is a proof of concept server to test using the WFS 3.0 specification for distributing meteorological data using an encoding that will be calle simple observation features.",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"homepage": "https://github.com/vaisala-oss/sofp-core",
 	"author": "Vaisala Corporation",
 	"license": "MIT",
