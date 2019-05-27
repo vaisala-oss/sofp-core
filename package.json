@@ -35,9 +35,8 @@
 		"moment-isoduration": "0.0.3",
 		"morgan": "^1.9.1",
 		"rotating-file-stream": "^1.4.0",
-		"shins": "^2.3.2-3",
 		"sofp-lib": "0.2.2",
-		"widdershins": "^3.6.7"
+		"swagger-ui": "^3.22.2"
 	},
 	"devDependencies": {
 		"@types/jest": "~23.3.1",

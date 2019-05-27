@@ -1,10 +1,8 @@
 import { API, RequestParameters } from './api';
 import { Collection, Property } from 'sofp-lib';
 
-import * as widdershins from 'widdershins';
-import * as shins from 'shins';
-
 import * as yaml from 'js-yaml';
+import * as SwaggerUI from 'swagger-ui-express';
 
 import * as _ from 'lodash';
 
@@ -463,7 +461,7 @@ export class OpenAPI {
         } else if (format === 'json') {
             return obj;
         } else if (format === 'html') {
-
+/*
             const widderShinsOptions = {
                 codeSamples: true,
                 httpsnippet: false,
@@ -498,7 +496,7 @@ export class OpenAPI {
                     });
                 });
             });
-
+*/
         } else {
             new Error('cannot serialize format '+format);
         }
