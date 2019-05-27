@@ -1,5 +1,5 @@
 import { API, RequestParameters } from './api';
-import { Collection, Property } from 'sofp-lib';
+import { Collection, Property, QueryParameter } from 'sofp-lib';
 
 import * as widdershins from 'widdershins';
 import * as shins from 'shins';
@@ -371,7 +371,13 @@ export class OpenAPI {
                 '$ref': '#/components/parameters/time'
             }];
 
+            var allLowerCaseParameters = ['limit', 'bbox', 'time'];
+
             _.each(collection.properties, (p : Property) => {
+                if (allLowerCaseParameters.indexOf(p.name.toLowerCase()) !== -1) {
+                    return;
+                }
+                allLowerCaseParameters.push(p.name.toLowerCase());
                 var prop : any = {
                     name: p.name,
                     in: 'query',
@@ -379,10 +385,34 @@ export class OpenAPI {
                     required: false
                 };
 
-                if (p.description) {
-                    prop.description = p.description;
-                }
+                prop.description = 'Filters returned features based on feature properties.'
+                prop.description += p.description ? (' '+p.description) : '';
 
+                if (_.size(p.exampleValues) > 0) {
+                    prop.schema.example = p.exampleValues[0];
+                }
+                parameters.push(prop);
+            });
+
+            _.each(collection.additionalQueryParameters, (p : QueryParameter) => {
+                if (allLowerCaseParameters.indexOf(p.name.toLowerCase()) !== -1) {
+                    return;
+                }
+                allLowerCaseParameters.push(p.name.toLowerCase());
+                var prop : any = {
+                    name: p.name,
+                    in: 'query',
+                    schema: { type: p.type },
+                    required: false
+                };
+
+                prop.description = p.description ? (p.description+' ') : '';
+                prop.description += 'There is no direct connection between the name of this parameter and properties of returned features.'
+
+                if (_.size(p.exampleValues) > 0) {
+                    prop.schema.example = p.exampleValues[0];
+                }
+                
                 parameters.push(prop);
             });
 
