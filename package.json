@@ -1,7 +1,7 @@
 {
 	"name": "sofp-core",
 	"description": "This is a proof of concept server to test using the WFS 3.0 specification for distributing meteorological data using an encoding that will be calle simple observation features.",
-	"version": "0.4.1",
+	"version": "0.4.2",
 	"homepage": "https://github.com/vaisala-oss/sofp-core",
 	"author": "Vaisala Corporation",
 	"license": "MIT",
@@ -29,14 +29,14 @@
 		"@turf/turf": "~5.1.6",
 		"commander": "^2.19.0",
 		"express": "~4.16.3",
-		"js-yaml": "^3.12.1",
-		"lodash": "~4.17.11",
+		"js-yaml": "^3.13.1",
+		"lodash": "^4.17.15",
 		"moment": "~2.22.2",
 		"moment-isoduration": "0.0.3",
 		"morgan": "^1.9.1",
 		"rotating-file-stream": "^1.4.0",
 		"shins": "^2.3.2-3",
-		"sofp-lib": "0.3.2",
+		"sofp-lib": "0.3.3",
 		"widdershins": "^3.6.7"
 	},
 	"devDependencies": {
@@ -46,7 +46,7 @@
 		"nodemon": "~1.18.10",
 		"ts-jest": "~23.1.4",
 		"ts-node": "~7.0.1",
-		"typedoc": "~0.12.0",
+		"typedoc": "^0.15.0",
 		"typescript": "^3.2.4"
 	}
 }
