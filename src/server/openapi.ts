@@ -67,10 +67,10 @@ export class OpenAPI {
 
                             '* Lower left corner, coordinate axis 1\n'+
                             '* Lower left corner, coordinate axis 2\n'+
-                            //'* Lower left corner, coordinate axis 3 (optional)\n'+
+                            '* Lower left corner, coordinate axis 3 (optional)\n'+
                             '* Upper right corner, coordinate axis 1\n'+
                             '* Upper right corner, coordinate axis 2\n'+
-                            //'* Upper right corner, coordinate axis 3 (optional)\n'+
+                            '* Upper right corner, coordinate axis 3 (optional)\n'+
 
                             'The coordinate reference system of the values is WGS84 longitude/latitude '+
                             '(http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate '+
@@ -88,7 +88,7 @@ export class OpenAPI {
                         schema: {
                             type: 'array',
                             minItems: 4,
-                            maxItems: 4, // 6
+                            maxItems: 6,
                             items: {
                               type: 'number'
                             }

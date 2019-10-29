@@ -268,6 +268,11 @@ export class API {
                 rel: 'data',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
+            },{
+                href: params.baseUrl + '/collections?f=html',
+                rel: 'data',
+                type: 'text/html',
+                title: 'Metadata about the feature collections'
             }]
         };
     }
@@ -283,9 +288,14 @@ export class API {
 
         let ret : APIResponse = {
             links: [{
-                href: params.baseUrl + '/collections',
+                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.name) : ''),
                 rel: 'self',
                 type: 'application/json',
+                title: 'Metadata about the feature collections'
+            },{
+                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.name) : '') + '?f=html',
+                rel: 'self',
+                type: 'text/html',
                 title: 'Metadata about the feature collections'
             }],
             collections: collections
@@ -295,7 +305,13 @@ export class API {
             collection.links.unshift({
                 href: params.baseUrl + '/collections/'+collection.name+'/items',
                 rel: 'item',
-                type: 'application/json',
+                type: 'application/geo+json',
+                title: collection.title
+            });
+            collection.links.unshift({
+                href: params.baseUrl + '/collections/'+collection.name+'/items?f=html',
+                rel: 'item',
+                type: 'text/html',
                 title: collection.title
             });
         });
