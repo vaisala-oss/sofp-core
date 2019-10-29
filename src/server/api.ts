@@ -303,13 +303,13 @@ export class API {
 
         _.each(collections, (collection) => {
             collection.links.unshift({
-                href: params.baseUrl + '/collections/'+collection.name+'/items',
+                href: params.baseUrl + '/collections/'+collection.id+'/items',
                 rel: 'item',
                 type: 'application/geo+json',
                 title: collection.title
             });
             collection.links.unshift({
-                href: params.baseUrl + '/collections/'+collection.name+'/items?f=html',
+                href: params.baseUrl + '/collections/'+collection.id+'/items?f=html',
                 rel: 'item',
                 type: 'text/html',
                 title: collection.title
