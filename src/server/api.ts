@@ -397,6 +397,12 @@ export class API {
             res.write('\t\t"type":"application/geo+json",\n');
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
+            res.write(',{\n');
+            res.write('\t\t"href": '+JSON.stringify(selfUri+'?f=html')+',\n');
+            res.write('\t\t"rel": "self",\n');
+            res.write('\t\t"type":"text/html",\n');
+            res.write('\t\t"title":"This document"\n');
+            res.write('\t}');
 
             if (n === params.itemQuery.limit && lastItem.nextToken !== undefined && lastItem.nextToken !== null) {
                 if (nextTokenIndex === undefined) {
@@ -410,6 +416,13 @@ export class API {
                 res.write('\t\t"href": '+JSON.stringify(nextUri)+',\n');
                 res.write('\t\t"rel": "next",\n');
                 res.write('\t\t"type":"application/geo+json",\n');
+                res.write('\t\t"title":"Next results"\n');
+                res.write('\t}');
+
+                res.write(',{\n');
+                res.write('\t\t"href": '+JSON.stringify(nextUri+'&f=html')+',\n');
+                res.write('\t\t"rel": "next",\n');
+                res.write('\t\t"type":"text/html",\n');
                 res.write('\t\t"title":"Next results"\n');
                 res.write('\t}');
             }
