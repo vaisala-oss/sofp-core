@@ -283,7 +283,7 @@ export class API {
      */ 
     getFeatureCollectionsMetadata(params : RequestParameters, collection? : Collection) : APIResponse {
         var collections = collection ? [ collection ] : this.server.getCollections();
-        collections = _.map(collections, c => _.pick(c, 'name', 'title', 'description', 'links', 'extent', 'crs'));
+        collections = _.map(collections, c => { return { 'id': c.name, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
         collections = _.cloneDeep(collections);
 
         let ret : APIResponse = {
