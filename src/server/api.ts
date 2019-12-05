@@ -142,8 +142,8 @@ export class API {
             sendResponse(req, res, response);
         });
 
-        app.get(this.contextPath + 'collections/:name', (req, res, next) => {
-            let collection = this.server.getCollection(req.params.name);
+        app.get(this.contextPath + 'collections/:id', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
             }
@@ -157,8 +157,8 @@ export class API {
             sendResponse(req, res, response);
         });
 
-        app.get(this.contextPath + 'collections/:name/items', (req, res, next) => {
-            let collection = this.server.getCollection(req.params.name);
+        app.get(this.contextPath + 'collections/:id/items', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
             }
@@ -177,13 +177,13 @@ export class API {
             this.produceOutput(params, stream, res);
         });
 
-        app.get(this.contextPath + 'collections/:name/items/:id', (req, res, next) => {
-            let collection = this.server.getCollection(req.params.name);
+        app.get(this.contextPath + 'collections/:id/items/:itemId', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
             }
 
-            collection.getFeatureById(req.params.id).then(f => {
+            collection.getFeatureById(req.params.itemId).then(f => {
                 if (!f) {
                     return next();
                 }
@@ -283,17 +283,17 @@ export class API {
      */ 
     getFeatureCollectionsMetadata(params : RequestParameters, collection? : Collection) : APIResponse {
         var collections = collection ? [ collection ] : this.server.getCollections();
-        collections = _.map(collections, c => { return { 'id': c.name, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
+        collections = _.map(collections, c => { return { 'id': c.id, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
         collections = _.cloneDeep(collections);
 
         let ret : APIResponse = {
             links: [{
-                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.name) : ''),
+                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.id) : ''),
                 rel: 'self',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
             },{
-                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.name) : '') + '?f=html',
+                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.id) : '') + '?f=html',
                 rel: 'self',
                 type: 'text/html',
                 title: 'Metadata about the feature collections'
@@ -388,7 +388,7 @@ export class API {
                 nextTokenIndex = queryString.length-1;
             }
 
-            var selfUri = params.baseUrl + '/collections/' + params.collection.name + '/items?' +
+            var selfUri = params.baseUrl + '/collections/' + params.collection.id + '/items?' +
                 queryString.join('&');
 
             res.write('{\n');
@@ -409,7 +409,7 @@ export class API {
                     nextTokenIndex = queryString.length;
                 }
                 queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(lastItem.nextToken);
-                var nextUri = params.baseUrl + '/collections/' + params.collection.name + '/items?' +
+                var nextUri = params.baseUrl + '/collections/' + params.collection.id + '/items?' +
                     queryString.join('&');
 
                 res.write(',{\n');

@@ -76,7 +76,7 @@ test('Server collection response should only include API fields, not "private" f
 
     const MockServer2 = jest.fn<Server>(() => ({
         getCollections: () => [{
-            name: 'foo',
+            id: 'foo',
             title: 'blaa',
             links: [],
             xxx: 'this field should be hidden'
@@ -90,7 +90,7 @@ test('Server collection response should only include API fields, not "private" f
     expect(response.collections.length).toBe(1);
 
     let c = response.collections[0];
-    expect(c.name).toBe('foo');
+    expect(c.id).toBe('foo');
     expect(c.title).toBe('blaa');
     expect(c.xxx).toBeUndefined();
 });

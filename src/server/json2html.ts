@@ -25,9 +25,9 @@ function produceBody(title, data) {
         ret += _.map(data.collections, c => {
             var tmp = '';
             if (c.title) {
-                tmp += `<h3>${c.title} (${c.name})</h3>`;
+                tmp += `<h3>${c.title} (${c.id})</h3>`;
             } else {
-                tmp += `<h3>${c.name}</h3>`;
+                tmp += `<h3>${c.id}</h3>`;
             }
             tmp += `<p>${c.description}</p>`;
             tmp += `<h4>Links for the collection</h4>`;

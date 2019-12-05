@@ -85,7 +85,7 @@ console.log('Active backends ('+server.backends.length+') and their collections:
 _.each(server.backends, (backend) => {
     console.log('  - '+backend.name);
     _.each(backend.collections, (collection) => {
-        console.log('     |- '+collection.name);
+        console.log('     |- '+collection.id);
     });
 });
 console.log('Try visiting http://localhost:'+serverPort+api.contextPath);

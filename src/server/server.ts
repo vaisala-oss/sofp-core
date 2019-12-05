@@ -19,7 +19,7 @@ export class Server {
         return ret;
     };
 
-    getCollection(name : string) : Collection {
+    getCollection(id : string) : Collection {
         let i : number, o : number;
         let b : Backend;
         let c : Collection;
@@ -28,7 +28,7 @@ export class Server {
             b = this.backends[i];
             for (o = 0; o < b.collections.length; o++) {
                 c = b.collections[o];
-                if (c.name === name) {
+                if (c.id === id) {
                     return c;
                 }
             }

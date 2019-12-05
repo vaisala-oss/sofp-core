@@ -1,8 +1,8 @@
 import {Backend, Collection, Query} from 'sofp-lib';
 import {Server} from './server';
 
-const MockCollection = jest.fn<Collection>((name : string) => ({
-    name: name
+const MockCollection = jest.fn<Collection>((id : string) => ({
+    id: id
 }));
 
 const MockBackend = jest.fn<Backend>(() => ({
@@ -22,7 +22,7 @@ test('Single-backend server returns single collection', () => {
 
     expect(collections).toEqual([
         {
-            name: 'Foo'
+            id: 'Foo'
         }
     ]);
 });
@@ -42,13 +42,13 @@ test('Multi-backend server returns all collections', () => {
     let collections = server.getCollections();
 
     expect(collections).toEqual([
-        { name: 'Foo1' },
-        { name: 'Foo2' },
-        { name: 'Bar' }
+        { id: 'Foo1' },
+        { id: 'Foo2' },
+        { id: 'Bar' }
     ]);
 });
 
-test('Find collection by name', () => {
+test('Find collection by id', () => {
     let server = new Server();
 
     let mockBackend1 = new MockBackend();
@@ -80,8 +80,8 @@ test('Execute query targets correct collection', () => {
     };
 
     let mockBackend = new MockBackend();
-    const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
-        name: name,
+    const MockCollectionWithQuery = jest.fn<Collection>((id : string) => ({
+        id: id,
         executeQuery: (query : Query) => fakeCursor
     }));
 
@@ -114,8 +114,8 @@ test('Execute query applies remaining filters - case accept', () => {
     };
 
     let mockBackend = new MockBackend();
-    const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
-        name: name,
+    const MockCollectionWithQuery = jest.fn<Collection>((id : string) => ({
+        id: id,
         executeQuery: (query : Query) => fakeCursor
     }));
 
@@ -152,8 +152,8 @@ test('Execute query applies remaining filters - case not accept', () => {
     };
 
     let mockBackend = new MockBackend();
-    const MockCollectionWithQuery = jest.fn<Collection>((name : string) => ({
-        name: name,
+    const MockCollectionWithQuery = jest.fn<Collection>((id : string) => ({
+        id: id,
         executeQuery: (query : Query) => fakeCursor
     }));
 

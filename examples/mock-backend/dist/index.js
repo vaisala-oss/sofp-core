@@ -1,6 +1,6 @@
 exports.MyBackend = {
     name: 'ExampleBackend',
-    collections: [{ name: 'foo' }],
+    collections: [{ id: 'foo' }],
     links: [
     ]
 };
