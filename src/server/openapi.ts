@@ -347,17 +347,17 @@ export class OpenAPI {
 
         const collections : Collection[] = this.api.server.getCollections();
         _.each(collections, (collection : Collection) => {
-            const featureCollectionSchemaName = collection.name+'FeatureCollectionGeoJSON';
-            const featureSchemaName = collection.name+'FeatureGeoJSON';
+            const featureCollectionSchemaName = collection.id+'FeatureCollectionGeoJSON';
+            const featureSchemaName = collection.id+'FeatureGeoJSON';
 
-            ret.paths['/collections/'+collection.name] = {
+            ret.paths['/collections/'+collection.id] = {
                 get: {
                     summary: 'describe the buildings feature collection',
                     description: collection.description,
-                    operationId: 'describeCollection_'+collection.name,
+                    operationId: 'describeCollection_'+collection.id,
                     tags: [ 'Capabilities' ],
                     responses: {
-                        '200': formulateResponse('metadata about the '+collection.name+' collection shared by this API', '#/components/schemas/collectionInfo'),
+                        '200': formulateResponse('metadata about the '+collection.id+' collection shared by this API', '#/components/schemas/collectionInfo'),
                         default: formulateResponse('an error occurred', '#/components/schemas/exception')
                     }
                 }
@@ -416,11 +416,11 @@ export class OpenAPI {
                 parameters.push(prop);
             });
 
-            ret.paths['/collections/'+collection.name+'/items'] = {
+            ret.paths['/collections/'+collection.id+'/items'] = {
                 get: {
-                    summary: 'retrieve features of '+collection.name+' feature collection',
+                    summary: 'retrieve features of '+collection.id+' feature collection',
                     description: collection.description,
-                    operationId: 'getFeatures_'+collection.name,
+                    operationId: 'getFeatures_'+collection.id,
                     tags: [ 'Features' ],
                     
                     parameters: parameters,
@@ -432,10 +432,10 @@ export class OpenAPI {
                 }
             };
 
-            ret.paths['/collections/'+collection.name+'/items/{featureId}'] = {
+            ret.paths['/collections/'+collection.id+'/items/{featureId}'] = {
                 get: {
-                    summary: 'retrieve single feature from feature collection '+collection.name,
-                    operationId: 'getFeature_'+collection.name,
+                    summary: 'retrieve single feature from feature collection '+collection.id,
+                    operationId: 'getFeature_'+collection.id,
                     tags: [ 'Features' ],
                     parameters: [{
                         '$ref': '#/components/parameters/featureId'

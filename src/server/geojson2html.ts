@@ -33,7 +33,7 @@ export class geojson2html {
         const data = JSON.parse(this.jsonString.join(''));
         
         const html = json2html(data, {
-            title: 'Data' + (this.collection.name ? ' from collection "'+this.collection.name+'"' : '')
+            title: 'Data' + (this.collection.id ? ' from collection "'+this.collection.id+'"' : '')
         });
         
         this.response.end(html);
