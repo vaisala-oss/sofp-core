@@ -14,7 +14,7 @@ import { geojson2html } from './geojson2html';
 import {filterProviders} from './filters/';
 
 /**
- * The API class provides accessors to produce metadata for the WFS 3.0 API. The API class wraps a Server object 
+ * The API class provides accessors to produce metadata for the OGC API Features service. The API class wraps a Server object 
  * and uses the data and configuration within that object to produce responses.
  **/
 
@@ -266,7 +266,7 @@ export class API {
                 href: params.baseUrl + '/conformance',
                 rel: 'conformance',
                 type: 'application/json',
-                title: 'WFS 3.0 conformance classes implemented by this server'
+                title: 'OGC API Features conformance classes implemented by this server'
             },{
                 href: params.baseUrl + '/collections',
                 rel: 'data',

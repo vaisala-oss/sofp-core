@@ -24,7 +24,7 @@ export class OpenAPI {
             openapi: '3.0.1',
             info: {
                 version: pkgInfo.version,
-                title: 'SOFP WFS 3.0 server',
+                title: 'SOFP OGC API Features server',
                 license: {
                     name: 'MIT',
                 }
@@ -309,7 +309,7 @@ export class OpenAPI {
 
         ret.paths['/'] = {
             get: {
-                summary: 'WFS 3.0 Landing page',
+                summary: 'OGC API Features Landing page',
                 operationId: 'getLandingPage',
                 tags: [ 'Capabilities' ],
                 responses: {

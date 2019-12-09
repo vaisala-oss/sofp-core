@@ -48,7 +48,7 @@ if (program.args.length > 0) {
 
 const server = new Server(backends);
 
-const api = new API(server, { title: 'SOFP WFS 3.0 server', contextPath: program.contextPath || '/sofp' });
+const api = new API(server, { title: 'SOFP - OGC API Features', contextPath: program.contextPath || '/sofp' });
 
 const app = express();
 
