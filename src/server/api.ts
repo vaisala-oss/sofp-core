@@ -81,7 +81,11 @@ export class API {
     identifyResponseFormat(req : express.req) {
         // select output format, query parameter 'f' value is primary, accept text/html secondayr, json is default
         let acceptsHtml = (req.headers['accept'] || '').toLowerCase().split(',').indexOf('text/html') !== -1;
-        let requestedFormat = (req.query['f'] || '').toLowerCase();
+        let requestedFormat = req.query['f'];
+        if (_.isArray(requestedFormat)) {
+            requestedFormat = requestedFormat[requestedFormat.length-1];
+        }
+        requestedFormat = (requestedFormat || '').toLowerCase();
 
         let format;
 
