@@ -192,7 +192,7 @@ export class API {
                     return next();
                 }
                 res.json(f);
-            });
+	        }).catch(next);
         });
 
         app.get(this.contextPath + 'api.yaml', async (req, res, next) => {
