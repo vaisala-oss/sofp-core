@@ -18,7 +18,8 @@ class BBOXFilter implements Filter {
     asQuery     : string = null;
     parameters = {
         coords: null,
-        turfPolygon: null
+        turfPolygon: null,
+        bboxCrs: null
     };
 
     accept(feature : Feature) : boolean {
@@ -40,8 +41,7 @@ class BBOXFilter implements Filter {
             throw new Error('Illegal entry in bounding box '+param);
         }});
 
-        // TODO: reproject if crs is set
-        // TODO: add proj4 2.5.0 as a dependency
+        this.parameters.bboxCrs = crs || 'http://www.opengis.net/def/crs/OGC/1.3/CRS84';
 
         this.parameters.turfPolygon = turf.bboxPolygon(this.parameters.coords);
     }
