@@ -324,13 +324,12 @@ export class API {
     }
 
     getConformancePage(params : RequestParameters) : object {
-        // TODO: this is still a lie, but we're getting there..
         return {
             conformsTo: [
-                'http://www.opengis.net/spec/wfs-1/3.0/req/core',
-                'http://www.opengis.net/spec/wfs-1/3.0/req/oas30',
-                'http://www.opengis.net/spec/wfs-1/3.0/req/geojson',
-                'http://www.opengis.net/spec/wfs-1/3.0/req/html' ]
+                'http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core',
+                'http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30',
+                'http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson',
+                'http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/html' ]
         };
     }
 
