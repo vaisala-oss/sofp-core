@@ -358,7 +358,7 @@ export class API {
                 res.write('\t\t"type": "name",\n');
                 res.write('\t\t"properties": {\n');
                 res.write('\t\t\t"name": '+JSON.stringify(stream.crs)+'\n');
-                res.write('\t\t},\n');
+                res.write('\t\t}\n');
                 res.write('\t},\n');
             }
             res.write('\t"features": [');
