@@ -20,7 +20,7 @@ export class geojson2html {
 
     writeHead(statusCode : Number, headers : any) {
         const modifiedHeaders = _.pickBy(headers, (v, k) => k.toLowerCase() !== 'content-type' );
-        modifiedHeaders['Content-Type'] = 'text/html';
+        modifiedHeaders['Content-Type'] = 'text/html; charset=utf-8';
 
         this.response.writeHead(statusCode, modifiedHeaders);
     }

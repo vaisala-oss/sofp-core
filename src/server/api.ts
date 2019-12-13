@@ -123,7 +123,7 @@ export class API {
             const format = this.identifyResponseFormat(req);
 
             if (format === 'HTML') {
-                res.header('Content-Type', 'text/html');
+                res.header('Content-Type', 'text/html; charset=utf-8');
                 res.end(json2html(jsonResponse));
                 return;
             }
@@ -221,10 +221,9 @@ export class API {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
             try {
                 const response = await openapi.serialize('html');
-                res.header('Content-Type', 'text/html');
+                res.header('Content-Type', 'text/html; charset=utf-8');
                 res.end(response);
             } catch(e) {
-                console.log('wwww');
                 next(e);
             }
 
