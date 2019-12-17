@@ -347,8 +347,8 @@ export class OpenAPI {
 
         const collections : Collection[] = this.api.server.getCollections();
         _.each(collections, (collection : Collection) => {
-            const featureCollectionSchemaName = collection.id+'FeatureCollectionGeoJSON';
-            const featureSchemaName = collection.id+'FeatureGeoJSON';
+            const featureCollectionSchemaName = collection.schemaName ? (collection.schemaName+'Collection') : (collection.id+'FeatureCollectionGeoJSON');
+            const featureSchemaName = collection.schemaName || (collection.id+'FeatureGeoJSON');
 
             ret.paths['/collections/'+collection.id] = {
                 get: {
@@ -473,7 +473,7 @@ export class OpenAPI {
                     },
                     properties: {
                         type: 'object',
-                        properties: _.reduce(collection.properties, (memo, p) => { memo[p.name] = { type: p.type }; return memo; }, {}),
+                        properties: _.reduce(collection.properties, (memo, p) => { memo[p.name] = { type: p.type, description: p.description }; return memo; }, {}),
                     },
                     id: {
                         oneOf: [{ type: 'string' }, { type: 'integer' }]
