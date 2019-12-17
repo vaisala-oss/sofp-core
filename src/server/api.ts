@@ -146,22 +146,26 @@ export class API {
             sendResponse(req, res, response);
         });
 
-        app.get(this.contextPath + 'collections/:id', (req, res, next) => {
-            let collection = this.server.getCollection(req.params.id);
-            if (!collection) {
-                return next();
-            }
-            
-            let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req), collection);
-            sendResponse(req, res, response);
-        });
-
         app.get(this.contextPath + 'conformance', (req, res) => {
             let response = this.getConformancePage(produceRequestParameters(req));
             sendResponse(req, res, response);
         });
 
-        app.get(this.contextPath + 'collections/:id/items', (req, res, next) => {
+        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items/:itemId', (req, res, next) => {
+            let collection = this.server.getCollection(req.params.id);
+            if (!collection) {
+                return next();
+            }
+
+            collection.getFeatureById(req.params.itemId).then(f => {
+                if (!f) {
+                    return next();
+                }
+                res.json(f);
+            }).catch(next);
+        });
+
+        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items', (req, res, next) => {
             let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
@@ -181,19 +185,16 @@ export class API {
             this.produceOutput(params, stream, res);
         });
 
-        app.get(this.contextPath + 'collections/:id/items/:itemId', (req, res, next) => {
+        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)', (req, res, next) => {
             let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
             }
-
-            collection.getFeatureById(req.params.itemId).then(f => {
-                if (!f) {
-                    return next();
-                }
-                res.json(f);
-	        }).catch(next);
+            
+            let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req), collection);
+            sendResponse(req, res, response);
         });
+
 
         app.get(this.contextPath + 'api.yaml', async (req, res, next) => {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
