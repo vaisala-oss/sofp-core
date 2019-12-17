@@ -350,11 +350,15 @@ export class OpenAPI {
             const featureCollectionSchemaName = collection.schemaName ? (collection.schemaName+'Collection') : (collection.id+'FeatureCollectionGeoJSON');
             const featureSchemaName = collection.schemaName || (collection.id+'FeatureGeoJSON');
 
+            const operationId_describeCollection = ('describeCollection_'+collection.id).replace(/\//g,'_');
+            const operationId_getFeatures = ('getFeatures_'+collection.id).replace(/\//g,'_');
+            const operationId_getFeature = ('getFeature_'+collection.id).replace(/\//g,'_');
+
             ret.paths['/collections/'+collection.id] = {
                 get: {
                     summary: 'describe the buildings feature collection',
                     description: collection.description,
-                    operationId: 'describeCollection_'+collection.id,
+                    operationId: operationId_describeCollection,
                     tags: [ 'Capabilities' ],
                     responses: {
                         '200': formulateResponse('metadata about the '+collection.id+' collection shared by this API', '#/components/schemas/collectionInfo'),
@@ -420,7 +424,7 @@ export class OpenAPI {
                 get: {
                     summary: 'retrieve features of '+collection.id+' feature collection',
                     description: collection.description,
-                    operationId: 'getFeatures_'+collection.id,
+                    operationId: operationId_getFeatures,
                     tags: [ 'Features' ],
                     
                     parameters: parameters,
@@ -435,7 +439,7 @@ export class OpenAPI {
             ret.paths['/collections/'+collection.id+'/items/{featureId}'] = {
                 get: {
                     summary: 'retrieve single feature from feature collection '+collection.id,
-                    operationId: 'getFeature_'+collection.id,
+                    operationId: operationId_getFeature,
                     tags: [ 'Features' ],
                     parameters: [{
                         '$ref': '#/components/parameters/featureId'
