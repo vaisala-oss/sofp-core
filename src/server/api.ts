@@ -38,6 +38,12 @@ export interface APIParameters {
     contextPath?: string;
 }
 
+export interface CacheEntry {
+    ts : number; // timestamp of entry
+    ttl : number; //  ttl of entry
+    value : any;
+}
+
 export function deduceContextPath(configuredContextPath, xForwardedPath) {
     function removeEndSlash(str) {
         while (str.charAt(str.length-1) === '/') {
@@ -65,10 +71,14 @@ export class API {
     title : string;
     contextPath : string;
 
+    responseCache : any;
+
     constructor(server : Server, params : APIParameters) {
         this.server = server;
         this.title = params.title;
         this.contextPath = params.contextPath || '';
+
+        this.responseCache = {};
 
         if (this.contextPath.charAt(0) !== '/') {
             this.contextPath = '/' + this.contextPath;

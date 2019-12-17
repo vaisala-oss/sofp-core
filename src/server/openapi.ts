@@ -1,4 +1,4 @@
-import { API, RequestParameters } from './api';
+import { API, RequestParameters, CacheEntry } from './api';
 import { Collection, Property, QueryParameter } from 'sofp-lib';
 
 import * as widdershins from 'widdershins';
@@ -9,6 +9,8 @@ import * as yaml from 'js-yaml';
 import * as _ from 'lodash';
 
 const pkgInfo = require('../../package.json');
+
+const OPENAPI_HTML_RESPONSE_TTL_MILLIS = 3600000;
 
 export class OpenAPI {
     api : API;
@@ -490,13 +492,22 @@ export class OpenAPI {
     }
 
     async serialize(format) {
-        let obj = this.getObject();
+        const that = this;
+        let obj = that.getObject();
 
         if (format === 'yaml') {
             return yaml.dump(obj);
         } else if (format === 'json') {
             return obj;
         } else if (format === 'html') {
+
+            var cache = that.api.responseCache['openapi-html'];
+            var now = new Date().getTime();
+            if (cache && (cache.ttl + cache.ts) > now) {
+                return new Promise((resolve, reject) => {
+                    resolve(cache.value);
+                });
+            }
 
             const widderShinsOptions = {
                 codeSamples: true,
@@ -530,6 +541,11 @@ export class OpenAPI {
 
                     shins.render(markdown, shinsOptions, function(err, html) {
                         if (err) { return reject(err); }
+                        that.api.responseCache['openapi-html'] = {
+                            ts: new Date().getTime(),
+                            ttl: OPENAPI_HTML_RESPONSE_TTL_MILLIS,
+                            value: html
+                        };
                         resolve(html);
                     });
                 });
