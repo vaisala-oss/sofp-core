@@ -491,7 +491,7 @@ export class OpenAPI {
 
     async serialize(format) {
         let obj = this.getObject();
-        console.log('format', format);
+
         if (format === 'yaml') {
             return yaml.dump(obj);
         } else if (format === 'json') {
