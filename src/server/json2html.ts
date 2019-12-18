@@ -19,6 +19,9 @@ function produceBody(title, data) {
     var ret = '';
 
     ret += `<h1>${escapeXml(title)}</h1>`;
+    if (data.description) {
+    	ret += `<p>${data.description}</p>`;
+    }
 
     if (data.collections) {
         ret += '<h2>Collections</h2>';
