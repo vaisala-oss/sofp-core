@@ -259,17 +259,17 @@ export class API {
                 title: this.title
             },{
                 href: params.baseUrl + '/api.json',
-                rel: 'service',
+                rel: 'service-desc',
                 type: 'application/openapi+json;version=3.0',
                 title: 'the API definition (JSON)',
             },{
                 href: params.baseUrl + '/api.yaml',
-                rel: 'service',
+                rel: 'service-desc',
                 type: 'application/openapi+yaml;version=3.0',
                 title: 'the API definition (YAML)',
             },{
                 href: params.baseUrl + '/api.html',
-                rel: 'service',
+                rel: 'service-doc',
                 type: 'text/html',
                 title: 'the API definition (HTML)',
             },{
