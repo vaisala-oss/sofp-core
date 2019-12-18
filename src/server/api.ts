@@ -19,6 +19,8 @@ import {filterProviders} from './filters/';
  **/
 
 export interface APIResponse {
+    title?: string;
+    description?: string;
     links?: Link[],
     collections?: Collection[]
 };
@@ -35,6 +37,7 @@ export interface RequestParameters {
 
 export interface APIParameters {
     title?: string;
+    description?: string;
     contextPath?: string;
 }
 
@@ -69,6 +72,7 @@ export class API {
     server : Server;
 
     title : string;
+    description : string;
     contextPath : string;
 
     responseCache : any;
@@ -76,6 +80,7 @@ export class API {
     constructor(server : Server, params : APIParameters) {
         this.server = server;
         this.title = params.title;
+	this.description = params.description;
         this.contextPath = params.contextPath || '';
 
         this.responseCache = {};
@@ -252,6 +257,8 @@ export class API {
      **/
     getApiLandingPage(params : RequestParameters) : APIResponse {
         return {
+	    'title': this.title,
+	    'description': this.description,
             links: [{
                 href: params.baseUrl + '/',
                 rel: 'self',
