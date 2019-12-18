@@ -10,30 +10,34 @@ const MockServer = jest.fn<Server>(() => ({
 /**
  * The content of that response SHALL be based upon the OpenAPI 3.0 schema root.yaml and include at least links to 
  * the following resources:
- * - /api (relation type 'service')
+ * - /api (relation type 'service-desc')
+ * - /api (relation type 'service-doc')
  * - /conformance (relation type 'conformance')
  * - /collections (relation type 'data')
  **/
 test('Content specific tests for requirement 2: /req/core/root-success', () => {
     let api = new API(new MockServer(), { contextPath: '' });
     let response = api.getApiLandingPage({ baseUrl: 'http://foo.com:1024', basePath: '/' });
-
+    
     // Links are mandatory
     expect(response.links).toBeInstanceOf(Array);
 
-    let linksByRel = _.reduce(response.links, (memo, link) => { memo[link.rel+'-'+link.type] = link; return memo; }, {});
+    let linksByRel = _.reduce(response.links, (memo, link) => { memo[link.rel+'#'+link.type] = link; return memo; }, {});
 
-    expect(linksByRel['service-application/openapi+json;version=3.0']).toBeDefined();
-    expect(linksByRel['service-application/openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api.json');
+    expect(linksByRel['service-desc#application/openapi+json;version=3.0']).toBeDefined();
+    expect(linksByRel['service-desc#application/openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api.json');
 
-    expect(linksByRel['service-application/openapi+yaml;version=3.0']).toBeDefined();
-    expect(linksByRel['service-application/openapi+yaml;version=3.0'].href).toBe('http://foo.com:1024/api.yaml');
+    expect(linksByRel['service-desc#application/openapi+yaml;version=3.0']).toBeDefined();
+    expect(linksByRel['service-desc#application/openapi+yaml;version=3.0'].href).toBe('http://foo.com:1024/api.yaml');
 
-    expect(linksByRel['conformance-application/json']).toBeDefined();
-    expect(linksByRel['conformance-application/json'].href).toBe('http://foo.com:1024/conformance');
+    expect(linksByRel['service-doc#text/html']).toBeDefined();
+    expect(linksByRel['service-doc#text/html'].href).toBe('http://foo.com:1024/api.html');
 
-    expect(linksByRel['data-application/json']).toBeDefined();
-    expect(linksByRel['data-application/json'].href).toBe('http://foo.com:1024/collections');
+    expect(linksByRel['conformance#application/json']).toBeDefined();
+    expect(linksByRel['conformance#application/json'].href).toBe('http://foo.com:1024/conformance');
+
+    expect(linksByRel['data#application/json']).toBeDefined();
+    expect(linksByRel['data#application/json'].href).toBe('http://foo.com:1024/collections');
 });
 
 /**
