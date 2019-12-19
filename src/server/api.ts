@@ -222,7 +222,7 @@ export class API {
             }
         });
 
-        app.get(this.contextPath + 'api.json', async (req, res, next) => {
+        app.get(this.contextPath + 'api', async (req, res, next) => {
             let openapi = new OpenAPI(this, produceRequestParameters(req));
             try {
                 const response = await openapi.serialize('json');
@@ -265,7 +265,7 @@ export class API {
                 type: 'application/json',
                 title: this.title
             },{
-                href: params.baseUrl + '/api.json',
+                href: params.baseUrl + '/api',
                 rel: 'service-desc',
                 type: 'application/openapi+json;version=3.0',
                 title: 'the API definition (JSON)',
