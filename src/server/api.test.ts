@@ -25,7 +25,7 @@ test('Content specific tests for requirement 2: /req/core/root-success', () => {
     let linksByRel = _.reduce(response.links, (memo, link) => { memo[link.rel+'#'+link.type] = link; return memo; }, {});
 
     expect(linksByRel['service-desc#application/openapi+json;version=3.0']).toBeDefined();
-    expect(linksByRel['service-desc#application/openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api.json');
+    expect(linksByRel['service-desc#application/openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api');
 
     expect(linksByRel['service-desc#application/openapi+yaml;version=3.0']).toBeDefined();
     expect(linksByRel['service-desc#application/openapi+yaml;version=3.0'].href).toBe('http://foo.com:1024/api.yaml');
