@@ -75,7 +75,7 @@ class TimeFilter implements Filter {
                     periodPart = 'P0M0DT'+periodPart.substring(1);
                 }
                 this.parameters.duration = moment.duration(periodPart);
-                this.parameters.momentEnd = moment.utc(moment(this.parameters.momentStart)).add(this.parameters.duration);
+                this.parameters.momentEnd = moment.utc(this.parameters.momentStart).add(this.parameters.duration);
             } else {
                 this.parameters.momentEnd = moment.utc(parts[1], moment.ISO_8601);
                 this.parameters.duration = moment.duration(this.parameters.momentEnd.diff(this.parameters.momentStart));
