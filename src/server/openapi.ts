@@ -536,11 +536,11 @@ export class OpenAPI {
             const shins = require('shins');
 
             return new Promise((resolve, reject) => {
-                widdershins.convert(obj,widderShinsOptions,function(err,markdown){
-                    if (err) { return reject(err); }
-
+                widdershins.convert(obj,widderShinsOptions)
+                .then(markdown => {
                     shins.render(markdown, shinsOptions, function(err, html) {
                         if (err) { return reject(err); }
+
                         that.api.responseCache['openapi-html'] = {
                             ts: new Date().getTime(),
                             ttl: OPENAPI_HTML_RESPONSE_TTL_MILLIS,
@@ -548,9 +548,10 @@ export class OpenAPI {
                         };
                         resolve(html);
                     });
+                }).catch(err => {
+                    reject(err);
                 });
             });
-
         } else {
             new Error('cannot serialize format '+format);
         }
