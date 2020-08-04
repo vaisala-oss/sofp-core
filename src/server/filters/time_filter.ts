@@ -56,7 +56,7 @@ class TimeFilter implements Filter {
 
     constructor(timeString, options, timePropertyNames) {
         this.options = options;
-        this.asQuery = 'time='+encodeURIComponent(timeString);
+        this.asQuery = 'datetime='+encodeURIComponent(timeString);
         this.parameters.timeString = timeString;
         if (_.isArray(timePropertyNames)) {
             this.parameters.timePropertyNames = _.map(timePropertyNames, str => str.toLowerCase());
@@ -100,8 +100,8 @@ export class TimeFilterProvider implements FilterProvider {
     }
 
     parseFilter(req : express.Request, collection : Collection) : Filter {
-        if (req.query.time) {
-            return new TimeFilter(req.query.time, this.options, collection.timePropertyNames);
+        if (req.query.datetime) {
+            return new TimeFilter(req.query.datetime, this.options, collection.timePropertyNames);
         }
         return null;
     }

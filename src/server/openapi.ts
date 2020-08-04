@@ -99,8 +99,8 @@ export class OpenAPI {
                         explode: false
                     },
                     // 'bbox-crs': { }, // TODO:
-                    time: {
-                        name: 'time',
+                    datetime: {
+                        name: 'datetime',
                         in: 'query',
                         description:
                             'Either a date-time or a period string that adheres to RFC 3339. Examples:\n'+
@@ -109,7 +109,7 @@ export class OpenAPI {
                             '* A period: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z" or "2018-02-12T00:00:00Z/P1M6DT12H31M12S"\n'+
 
                             'Only features that have a temporal property that intersects the value of '+
-                            '`time` are selected.\n'+
+                            '`datetime` are selected.\n'+
 
                             'If a feature has multiple temporal properties, it is the decision of the '+
                             'server whether only a single temporal property is used to determine '+
@@ -374,10 +374,10 @@ export class OpenAPI {
             },{
                 '$ref': '#/components/parameters/bbox'
             },{
-                '$ref': '#/components/parameters/time'
+                '$ref': '#/components/parameters/datetime'
             }];
 
-            var allLowerCaseParameters = ['limit', 'bbox', 'time'];
+            var allLowerCaseParameters = ['limit', 'bbox', 'datetime'];
 
             _.each(collection.properties, (p : Property) => {
                 if (allLowerCaseParameters.indexOf(p.name.toLowerCase()) !== -1) {
