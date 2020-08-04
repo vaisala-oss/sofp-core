@@ -6,18 +6,18 @@ import {API} from './api';
 
 import * as _ from 'lodash';
 
-import * as express from 'express';
 import * as http from 'http';
 
 import * as BackendLoader from './backend_loader';
 
-import * as commander from 'commander';
 import * as morgan from 'morgan';
 import RotatingFileStream from 'rotating-file-stream';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const program = commander
+const express = require('express');
+
+var program = require('commander')
   .command('sofp-core')
   .usage('[options] <path-to-backend ...>')
   .option('-p, --port [number]', 'Port number to listen (default 3000)')
