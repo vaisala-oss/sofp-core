@@ -267,12 +267,12 @@ export class API {
             },{
                 href: params.baseUrl + '/api',
                 rel: 'service-desc',
-                type: 'application/openapi+json;version=3.0',
+                type: 'application/vnd.oai.openapi+json;version=3.0',
                 title: 'the API definition (JSON)',
             },{
                 href: params.baseUrl + '/api.yaml',
                 rel: 'service-desc',
-                type: 'application/openapi+yaml;version=3.0',
+                type: 'application/vnd.oai.openapi;version=3.0',
                 title: 'the API definition (YAML)',
             },{
                 href: params.baseUrl + '/api.html',
