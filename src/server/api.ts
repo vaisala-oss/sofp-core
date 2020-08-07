@@ -222,7 +222,20 @@ export class API {
                 return next();
             }
             
-            let filters : Filter[] = this.parseFilters(req, collection);
+            let filters : Filter[];
+
+            try {
+                filters = this.parseFilters(req, collection);
+            } catch(e) {
+                return res.status(400).send('Illegal parameter(s), error message: '+e);
+            }
+
+            // Check that limit is indeed a number (part of requirement /req/core/query-param-invalid)
+            if (req.query.limit !== undefined && !_.isNumber(req.query.limit)) {
+                if (!/^[0-9]+$/.exec(req.query.limit)) {
+                    return res.status(400).send('limit should be a number');
+                }
+            }
 
             // Check that property filters are in-line with schema (requirement /req/core/query-param-unknown)
             var unprocessedParameters = {};
@@ -235,7 +248,7 @@ export class API {
             if (_.size(unprocessedParameters) > 0) {
                 return res.status(400).send('Unknown parameter(s): '+JSON.stringify(unprocessedParameters));
             }
-            
+
             const query : Query = {
                 limit:     req.query.limit ? Number(req.query.limit) : 10,
                 nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
