@@ -16,7 +16,7 @@ class TimeFilter implements Filter {
         timePropertyNames: null
     };
     options : object;
-    asQuery : string;
+    query : any;
 
     accept = function(f : Feature) {
         var propertiesAsMoments = _.reduce(f.properties, (memo, v, k) => {
@@ -56,7 +56,7 @@ class TimeFilter implements Filter {
 
     constructor(timeString, options, timePropertyNames) {
         this.options = options;
-        this.asQuery = 'datetime='+encodeURIComponent(timeString);
+        this.query = { 'datetime': timeString };
         this.parameters.timeString = timeString;
         if (_.isArray(timePropertyNames)) {
             this.parameters.timePropertyNames = _.map(timePropertyNames, str => str.toLowerCase());

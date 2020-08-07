@@ -1,5 +1,6 @@
 import {Feature, Filter, Collection} from 'sofp-lib';
 import {FilterProvider} from '../filter_provider';
+import {reservedParameterNames} from './';
 
 import * as express from 'express';
 import * as _ from 'lodash';
@@ -9,19 +10,17 @@ class AdditionalParameterFilter implements Filter {
     parameters = {
         parameters: null
     };
-    asQuery : string;
+    query : any;
 
     accept = function(f : Feature) {
         throw Error('AdditionalParameterFilters must be processed in the backend implementation');
     }
 
     constructor(parameters) {
-        this.asQuery = _.map(parameters, (v, k) => encodeURIComponent(k)+'='+encodeURIComponent(v) ).join('&');
+        this.query = _.cloneDeep(parameters);
         this.parameters.parameters = parameters;
     }
 };
-
-const reservedParameterNames = [ 'nexttoken', 'prev', 'limit', 'bbox', 'bbox-crs', 'datetime' ];
 
 export class AdditionalParameterFilterProvider implements FilterProvider {
     parseFilter(req : express.Request, collection : Collection) : Filter {

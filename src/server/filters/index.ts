@@ -9,3 +9,5 @@ export const filterProviders = [
     new TimeFilterProvider(),
     new AdditionalParameterFilterProvider()
 ];
+
+export const reservedParameterNames = [ 'f', 'nexttoken', 'prev', 'limit', 'bbox', 'bbox-crs', 'datetime' ];

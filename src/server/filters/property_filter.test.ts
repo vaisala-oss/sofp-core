@@ -63,7 +63,7 @@ test('Test not accept (1 parameter matches, 1 does not)', () => {
 test('Test serialisation', () => {
     let filter = provider.parseFilter({ query: { name: 'foo' }}, { properties: [{name: 'name'}]});
     
-    expect(filter.asQuery).toBe('name=foo');
+    expect(filter.query['name']).toBe('foo');
 });
 
 test('Test property names are lowercased', () => {
@@ -74,12 +74,12 @@ test('Test property names are lowercased', () => {
 
 test('Test property names are lowercased in serialised format', () => {
     let filter = provider.parseFilter({ query: { NAME: 'foo' }}, { properties: [{name: 'name'}]});
-    expect(filter.asQuery).toBe('name=foo');
+    expect(filter.query['name']).toBe('foo');
 });
 
 
 test('Test no property filter for reserved parameter', () => {
     let filter = provider.parseFilter({ query: { LIMIT: 'foo', foo: 'bar' }}, { properties: [{name: 'foo'}]});
-    expect(filter.asQuery).toBe('foo=bar');
+    expect(filter.query['name']).toBe('bar');
 });
 

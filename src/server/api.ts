@@ -11,7 +11,7 @@ import { json2html } from './json2html';
 
 import { geojson2html } from './geojson2html';
 
-import {filterProviders} from './filters/';
+import {filterProviders, reservedParameterNames} from './filters/';
 
 /**
  * The API class provides accessors to produce metadata for the OGC API Features service. The API class wraps a Server object 
@@ -222,7 +222,20 @@ export class API {
                 return next();
             }
             
-            let filters = this.parseFilters(req, collection);
+            let filters : Filter[] = this.parseFilters(req, collection);
+
+            // Check that property filters are in-line with schema (requirement /req/core/query-param-unknown)
+            var unprocessedParameters = {};
+            _.each(req.query, (v, k) => unprocessedParameters[k.toLowerCase()] = true);
+            _.each(reservedParameterNames, r => delete unprocessedParameters[r]);
+            _.each(filters, f => {
+                _.each(f.query, (v, k) => delete unprocessedParameters[k.toLowerCase()]);
+            });
+
+            if (_.size(unprocessedParameters) > 0) {
+                return res.status(400).send('Unknown parameter(s): '+JSON.stringify(unprocessedParameters));
+            }
+            
             const query : Query = {
                 limit:     req.query.limit ? Number(req.query.limit) : 10,
                 nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
@@ -488,7 +501,7 @@ export class API {
             res.write('\t"timeStamp": "'+new Date().toISOString()+'",\n');
             res.write('\t"links": [');
 
-            var queryString = _.map(params.itemQuery.filters, f => f.asQuery);
+            var queryString = _.filter(_.map(params.itemQuery.filters, f => _.map(f.query, (v,k) => encodeURIComponent(k) + '=' + encodeURIComponent(v))), s => _.isObject(s) && s !== '');
             queryString.push('limit=' + params.itemQuery.limit);
             var nextTokenIndex;
             if (params.itemQuery.nextToken) {
