@@ -166,17 +166,53 @@ export class API {
             sendResponse(req, res, response);
         });
 
-        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items/:itemId', (req, res, next) => {
+        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items/:itemId', (req, response, next) => {
+            let params = produceRequestParameters(req);
+            let res;
+
+            if (params.responseFormat === 'HTML') {
+                res = new geojson2html(response, params.collection);
+            } else if (params.responseFormat === 'JSON' || params.responseFormat === undefined) {
+                res = response;
+            } else {
+                throw Error('Unknown response format '+params.responseFormat);
+            }
+
             let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
             }
 
+
             collection.getFeatureById(req.params.itemId).then(f => {
                 if (!f) {
                     return next();
                 }
-                res.json(f);
+                var tmp = _.extend({}, f, {
+                    links: [{
+                        href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=json`,
+                        rel: 'self',
+                        type: 'application/geo+json',
+                        title: 'Link to this feature in JSON format'
+                    },{
+                        href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=html`,
+                        rel: 'alternate',
+                        type: 'text/html',
+                        title: 'Link to this feature in HTML format'
+                    },{
+                        href: `${params.baseUrl}/collections/${collection.id}`,
+                        rel: 'collection',
+                        type: 'application/json',
+                        title: 'Metadata about the feature collections this feature belongs to'
+                    }]
+                });
+
+                var json = JSON.stringify(tmp, null, '\t');
+                json = json.replace(/^\t/gm, '\t\t');
+                json = json.substring(0,json.length-1)+'\t}';
+
+                res.write(json);
+                res.end();
             }).catch(next);
         });
 
@@ -338,7 +374,7 @@ export class API {
 
         _.each(collections, (collection) => {
             collection.links.unshift({
-                href: params.baseUrl + '/collections/'+collection.id+'/items',
+                href: params.baseUrl + '/collections/'+collection.id+'/items?f=json',
                 rel: 'items',
                 type: 'application/geo+json',
                 title: collection.title
@@ -369,7 +405,7 @@ export class API {
                 type: 'text/html',
                 title: 'Metadata about this feature collection'
             },{
-                href: params.baseUrl + `/collections/${collection.id}/items`,
+                href: params.baseUrl + `/collections/${collection.id}/items?f=json`,
                 rel: 'items',
                 type: 'application/geo+json',
                 title: collection.title

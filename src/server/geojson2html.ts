@@ -32,9 +32,14 @@ export class geojson2html {
     end() {
         const data = JSON.parse(this.jsonString.join(''));
         
-        const html = json2html(data, {
-            title: 'Data' + (this.collection.id ? ' from collection "'+this.collection.id+'"' : '')
-        });
+        const options = {};
+        if (data.collection) {
+            options['title'] = 'Data' + (this.collection.id ? ' from collection "'+this.collection.id+'"' : '');
+        } else if (data.id) {
+            options['title'] = 'Feature ' + data.id;
+        }
+
+        const html = json2html(data, options);
         
         this.response.end(html);
     }
