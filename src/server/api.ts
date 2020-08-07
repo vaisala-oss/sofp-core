@@ -80,7 +80,7 @@ export class API {
     constructor(server : Server, params : APIParameters) {
         this.server = server;
         this.title = params.title;
-	this.description = params.description;
+        this.description = params.description;
         this.contextPath = params.contextPath || '';
 
         this.responseCache = {};
@@ -206,7 +206,7 @@ export class API {
                 return next();
             }
             
-            let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req), collection);
+            let response = this.getFeatureCollectionMetadata(produceRequestParameters(req), collection);
             sendResponse(req, res, response);
         });
 
@@ -299,23 +299,37 @@ export class API {
     }
 
     /**
-     * Return object following the WFS 3.0.0 draft 1 specification for feature collections metadata
+     * Convert Collection object to the format used in collections and collection API responses
+     **/
+    collectionToResponse(c : Collection) : any {
+        return {
+            'id': c.id,
+            'title': c.title,
+            'description': c.description,
+            'links': c.links,
+            'extent': c.extent,
+            'crs': c.crs
+        };
+    }
+
+    /**
+     * Return object following the OGC API Features specification for feature collections metadata
      * @link https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_feature_collections_metadata
      */ 
-    getFeatureCollectionsMetadata(params : RequestParameters, collection? : Collection) : APIResponse {
-        var collections = collection ? [ collection ] : this.server.getCollections();
-        collections = _.map(collections, c => { return { 'id': c.id, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
+    getFeatureCollectionsMetadata(params : RequestParameters) : APIResponse {
+        //var collections = _.map(this.server.getCollections(), c => { return { 'id': c.id, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
+        var collections = _.map(this.server.getCollections(), this.collectionToResponse);
         collections = _.cloneDeep(collections);
 
         let ret : APIResponse = {
             links: [{
-                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.id) : ''),
+                href: params.baseUrl + '/collections',
                 rel: 'self',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
             },{
-                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.id) : '') + '?f=html',
-                rel: 'self',
+                href: params.baseUrl + '/collections?f=html',
+                rel: 'alternate',
                 type: 'text/html',
                 title: 'Metadata about the feature collections'
             }],
@@ -325,16 +339,46 @@ export class API {
         _.each(collections, (collection) => {
             collection.links.unshift({
                 href: params.baseUrl + '/collections/'+collection.id+'/items',
-                rel: 'item',
+                rel: 'items',
                 type: 'application/geo+json',
                 title: collection.title
             });
             collection.links.unshift({
                 href: params.baseUrl + '/collections/'+collection.id+'/items?f=html',
-                rel: 'item',
+                rel: 'items',
                 type: 'text/html',
                 title: collection.title
             });
+        });
+
+        return ret;
+    }
+
+    getFeatureCollectionMetadata(params : RequestParameters, collection : Collection) : APIResponse {
+        let ret : APIResponse = {};
+
+        _.extend(ret, this.collectionToResponse(collection), {
+            links: [{
+                href: params.baseUrl + `/collections/${collection.id}`,
+                rel: 'self',
+                type: 'application/json',
+                title: 'Metadata about this feature collection'
+            },{
+                href: params.baseUrl + `/collections/${collection.id}?f=html`,
+                rel: 'alternate',
+                type: 'text/html',
+                title: 'Metadata about this feature collection'
+            },{
+                href: params.baseUrl + `/collections/${collection.id}/items`,
+                rel: 'items',
+                type: 'application/geo+json',
+                title: collection.title
+            },{
+                href: params.baseUrl + `/collections/${collection.id}/items?f=html`,
+                rel: 'items',
+                type: 'text/html',
+                title: collection.title
+            }]
         });
 
         return ret;
