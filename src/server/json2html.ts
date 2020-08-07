@@ -59,7 +59,7 @@ function produceBody(title, data) {
         } ).join('');
     }
 
-    if (data.type === 'FeatureCollection') {
+    if (data.type === 'FeatureCollection' || data.type === 'Feature') {
         ret += '<h2>Features</h2>';
         ret += '<div id="mapid"></div>';
 
@@ -112,7 +112,7 @@ export function json2html(data, extraOptions?) {
     html += '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">';
     html += '<script src="https://cdn.jsdelivr.net/npm/renderjson@1.4.0/renderjson.min.js"></script>';
 
-    if (data.type === 'FeatureCollection') {
+    if (data.type === 'FeatureCollection' || data.type === 'Feature') {
 
         html += '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.4.0/leaflet.css">';
 
