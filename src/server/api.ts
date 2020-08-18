@@ -458,7 +458,6 @@ export class API {
 
     produceOutput(params : RequestParameters, stream : FeatureStream, response : express.Response) {
         var n = 0;
-        var lastItem : Item = undefined;
         var receivedError : Error = null;
 
         let res : express.Response | geojson2html;
@@ -489,7 +488,6 @@ export class API {
         }
 
         stream.on('data', (d : Item) => {
-            lastItem = d;
             if (n === 0) {
                 startResponse(res);
             } else {
@@ -564,11 +562,11 @@ export class API {
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
 
-            if (n === params.itemQuery.limit && lastItem.nextToken !== undefined && lastItem.nextToken !== null) {
+            if (n === params.itemQuery.limit && stream.lastPushedItem && stream.lastPushedItem.nextToken !== undefined && stream.lastPushedItem.nextToken !== null) {
                 if (nextTokenIndex === undefined) {
                     nextTokenIndex = queryString.length;
                 }
-                queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(lastItem.nextToken);
+                queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(stream.lastPushedItem.nextToken);
                 var nextUri = params.baseUrl + '/collections/' + params.collection.id + '/items?' +
                     queryString.join('&');
 
