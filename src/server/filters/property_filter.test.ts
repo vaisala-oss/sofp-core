@@ -1,4 +1,4 @@
-import {PropertyFilterProvider} from './property_filter';
+import { PropertyFilterProvider } from './property_filter';
 
 const provider = new PropertyFilterProvider();
 
@@ -80,6 +80,6 @@ test('Test property names are lowercased in serialised format', () => {
 
 test('Test no property filter for reserved parameter', () => {
     let filter = provider.parseFilter({ query: { LIMIT: 'foo', foo: 'bar' }}, { properties: [{name: 'foo'}]});
-    expect(filter.query['name']).toBe('bar');
+    expect(filter.query['foo']).toBe('bar');
 });
 

@@ -11,7 +11,9 @@ import { json2html } from './json2html';
 
 import { geojson2html } from './geojson2html';
 
-import {filterProviders, reservedParameterNames} from './filters/';
+import {filterProviders} from './filters/';
+import {reservedParameterNames} from './constants';
+
 
 /**
  * The API class provides accessors to produce metadata for the OGC API Features service. The API class wraps a Server object 

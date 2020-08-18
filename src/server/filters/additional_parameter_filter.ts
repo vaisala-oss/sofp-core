@@ -1,6 +1,6 @@
 import {Feature, Filter, Collection} from 'sofp-lib';
 import {FilterProvider} from '../filter_provider';
-import {reservedParameterNames} from './';
+import {reservedParameterNames} from '../constants';
 
 import * as express from 'express';
 import * as _ from 'lodash';
