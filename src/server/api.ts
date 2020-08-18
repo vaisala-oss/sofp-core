@@ -459,6 +459,7 @@ export class API {
     produceOutput(params : RequestParameters, stream : FeatureStream, response : express.Response) {
         var n = 0;
         var lastItem : Item = undefined;
+        var receivedError : Error = null;
 
         let res : express.Response | geojson2html;
 
@@ -501,12 +502,29 @@ export class API {
             n++;
         });
 
-        stream.on('error', err => {
-            // TODO: how to handle the error case? We might have streamed content already out?
+        stream.on('error', (err : Error) => {
             console.error('Received error from backend', err);
+            receivedError = err;
         });
 
         stream.on('end', () => {
+            // the 'error' event happens immediately after 'end', so by
+            // delaying the closeStream function call, we can handle the
+            // error condition when actually closing the stream
+            setTimeout(closeStream);
+        });
+
+        function closeStream() {
+            if (receivedError) {
+                if (n === 0) {
+                    res.writeHead(503);
+                    res.write('Internal error');
+                } else {
+                    res.write('\nInternal error');
+                }
+                res.end();
+                return;
+            }
             if (n === 0) {
                 startResponse(res);
             }
@@ -526,14 +544,22 @@ export class API {
                 queryString.join('&');
 
             res.write('{\n');
-            res.write('\t\t"href": '+JSON.stringify(selfUri)+',\n');
-            res.write('\t\t"rel": "self",\n');
+            res.write('\t\t"href": '+JSON.stringify(selfUri+'&f=json')+',\n');
+            if (params.responseFormat === 'HTML') {
+                res.write('\t\t"rel": "alternate",\n');
+            } else {
+                res.write('\t\t"rel": "self",\n');
+            }
             res.write('\t\t"type":"application/geo+json",\n');
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
             res.write(',{\n');
             res.write('\t\t"href": '+JSON.stringify(selfUri+'&f=html')+',\n');
-            res.write('\t\t"rel": "self",\n');
+            if (params.responseFormat === 'HTML') {
+                res.write('\t\t"rel": "self",\n');
+            } else {
+                res.write('\t\t"rel": "alternate",\n');
+            }
             res.write('\t\t"type":"text/html",\n');
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
@@ -565,7 +591,7 @@ export class API {
             res.write('\t"numberReturned": '+n+'\n');
             res.write('}\n');
             res.end();
-        });
+        }
     }
 };
 
