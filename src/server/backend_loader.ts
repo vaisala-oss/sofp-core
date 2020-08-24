@@ -1,5 +1,4 @@
 import {Backend} from 'sofp-lib';
-import {MockBackend} from '../mock/mock_backend';
 
 import * as _ from 'lodash';
 

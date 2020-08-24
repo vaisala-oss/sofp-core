@@ -1,6 +1,6 @@
 import {Server} from './server';
 import {FilterProvider} from './filter_provider';
-import {Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
+import {Authorizer, Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
 
 import { OpenAPI } from './openapi';
 
@@ -116,6 +116,16 @@ export class API {
         return format;
     }
 
+    produceAuthorizer(req : express.req, collection : Collection) : Promise<Authorizer> {
+        if (this.server.authorizerProvider) {
+            return this.server.authorizerProvider.createAuthorizer(req, collection);
+        }
+
+        return new Promise((resolve, reject) => {
+            resolve(null);
+        });
+    }
+
     connectExpress(app: express) : void {
         let produceRequestParameters = (req: express.req) : RequestParameters => {
             let protocol = req.headers['x-forwarded-proto'] || req.protocol;
@@ -185,9 +195,14 @@ export class API {
                 return next();
             }
 
-
-            collection.getFeatureById(req.params.itemId).then(f => {
+            Promise.all([
+                collection.getFeatureById(req.params.itemId),
+                this.produceAuthorizer(req, collection)
+            ]).then(([f, authorizer]) => {
                 if (!f) {
+                    return next();
+                }
+                if (authorizer && !authorizer.accept(f.feature)) {
                     return next();
                 }
                 var tmp = _.extend({}, f, {
@@ -224,44 +239,51 @@ export class API {
                 return next();
             }
             
-            let filters : Filter[];
+            this.produceAuthorizer(req, collection).then(authorizer => {
+                let filters : Filter[];
 
-            try {
-                filters = this.parseFilters(req, collection);
-            } catch(e) {
-                return res.status(400).send('Illegal parameter(s), error message: '+e);
-            }
-
-            // Check that limit is indeed a number (part of requirement /req/core/query-param-invalid)
-            if (req.query.limit !== undefined && !_.isNumber(req.query.limit)) {
-                if (!/^[0-9]+$/.exec(req.query.limit)) {
-                    return res.status(400).send('limit should be a number');
+                try {
+                    filters = this.parseFilters(req, collection);
+                } catch(e) {
+                    return res.status(400).send('Illegal parameter(s), error message: '+e);
                 }
-            }
 
-            // Check that property filters are in-line with schema (requirement /req/core/query-param-unknown)
-            var unprocessedParameters = {};
-            _.each(req.query, (v, k) => unprocessedParameters[k.toLowerCase()] = true);
-            _.each(reservedParameterNames, r => delete unprocessedParameters[r]);
-            _.each(filters, f => {
-                _.each(f.query, (v, k) => delete unprocessedParameters[k.toLowerCase()]);
+                if (authorizer) {
+                    filters.push(authorizer);
+                }
+
+                // Check that limit is indeed a number (part of requirement /req/core/query-param-invalid)
+                if (req.query.limit !== undefined && !_.isNumber(req.query.limit)) {
+                    if (!/^[0-9]+$/.exec(req.query.limit)) {
+                        return res.status(400).send('limit should be a number');
+                    }
+                }
+
+                // Check that property filters are in-line with schema (requirement /req/core/query-param-unknown)
+                var unprocessedParameters = {};
+                _.each(req.query, (v, k) => unprocessedParameters[k.toLowerCase()] = true);
+                _.each(reservedParameterNames, r => delete unprocessedParameters[r]);
+                _.each(filters, f => {
+                    _.each(f.query, (v, k) => delete unprocessedParameters[k.toLowerCase()]);
+                });
+
+                if (_.size(unprocessedParameters) > 0) {
+                    return res.status(400).send('Unknown parameter(s): '+JSON.stringify(unprocessedParameters));
+                }
+
+                const query : Query = {
+                    limit:     req.query.limit ? Number(req.query.limit) : 10,
+                    nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
+                    filters: filters
+                };
+
+                const stream : FeatureStream = collection.executeQuery(query);
+                var params : RequestParameters = produceRequestParameters(req);
+                params.collection = collection;
+                params.itemQuery = query;
+                this.produceOutput(params, stream, res);
             });
 
-            if (_.size(unprocessedParameters) > 0) {
-                return res.status(400).send('Unknown parameter(s): '+JSON.stringify(unprocessedParameters));
-            }
-
-            const query : Query = {
-                limit:     req.query.limit ? Number(req.query.limit) : 10,
-                nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
-                filters: filters
-            };
-
-            const stream : FeatureStream = collection.executeQuery(query);
-            var params : RequestParameters = produceRequestParameters(req);
-            params.collection = collection;
-            params.itemQuery = query;
-            this.produceOutput(params, stream, res);
         });
 
         app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)', (req, res, next) => {

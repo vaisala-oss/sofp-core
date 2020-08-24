@@ -3,6 +3,7 @@ require('source-map-support').install();
 
 import {Server} from './server';
 import {API} from './api';
+import {AuthorizerProvider} from 'sofp-lib';
 
 import * as _ from 'lodash';
 
@@ -25,6 +26,7 @@ var program = require('commander')
   .option('-a, --accessLog [file]', 'Write access log to file (default: no log)')
   .option('-t, --title [service title]', 'Set title of the service')
   .option('-d, --desc [service description]', 'Set description of the service')
+  .option('-x, --authorizer [authorizer module name]', 'Load authorizer')
   .parse(process.argv);
 
 const serverPort = program.port || 3000;
@@ -48,10 +50,18 @@ if (program.args.length > 0) {
     }
 }
 
-const server = new Server(backends);
+let authorizerProvider : AuthorizerProvider;
 
 const title = program.title || 'SOFP - OGC API Features';
 const description = program.desc || 'This server is an OGC API Features service';
+const authorizer = program.authorizer || null;
+
+if (authorizer) {
+    console.log('Loading authorizer module: '+authorizer)
+    authorizerProvider = require(authorizer).authorizerProvider;
+}
+
+const server = new Server({backends, authorizerProvider});
 
 const api = new API(server, { title: String(title), description: String(description), contextPath: program.contextPath || '/sofp' });
 
