@@ -5,7 +5,7 @@
 	"homepage": "https://github.com/vaisala-oss/sofp-core",
 	"author": "Vaisala Corporation",
 	"license": "MIT",
-	"main": "dist/lib/index.js",
+	"main": "dist/server/index.js",
 	"engines": {
 		"node": "^8.11.4"
 	},

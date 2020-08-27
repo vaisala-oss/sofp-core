@@ -3,24 +3,24 @@ import { AuthorizerProvider, Authorizer, Collection, Feature } from 'sofp-lib';
 import * as express from 'express';
 
 export class MockAuthorizer extends Authorizer {
-    foo : String;
+    filterClass : String = 'MockAuthorizer';
+    unitOfMeasureName : String;
 
-    constructor(foo : String) {
+    constructor(unitOfMeasureName : String) {
         super();
-        this.foo = foo;
+        this.unitOfMeasureName = unitOfMeasureName;
     }
 
     accept(feature : Feature) : boolean {
-        return feature.properties['unitOfMeasureName'] === this.foo;
+        return feature.properties['unitOfMeasureName'] === this.unitOfMeasureName;
     }
 }
 
 export const authorizerProvider : AuthorizerProvider = {
     createAuthorizer(req : express.Request, collection : Collection) : Promise<Authorizer> {
         return new Promise((resolve, reject) => {
-            var foo : String = req.headers['foofoo'];
-            console.log('foo, foofoo: '+foo);
-            resolve(new MockAuthorizer(foo));
+            var unitOfMeasureName : String = req.headers['authuom'];
+            resolve(new MockAuthorizer(unitOfMeasureName));
         });
     }
 }
