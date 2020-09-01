@@ -15,7 +15,7 @@ function filterNumber(value : string) {
  **/
 class BBOXFilter implements Filter {
     filterClass : string = 'BBOXFilter';
-    asQuery     : string = null;
+    query       : any    = {};
     parameters = {
         coords: null,
         turfPolygon: null,
@@ -28,9 +28,9 @@ class BBOXFilter implements Filter {
     }
 
     constructor(param : string, crs : string) {
-        this.asQuery = 'bbox='+encodeURIComponent(param);
+        this.query['bbox'] = param;
         if (crs !== null && crs !== undefined) {
-            this.asQuery += '&bbox-crs='+encodeURIComponent(crs);
+            this.query['bbox-crs'] = crs;
         }
 
         this.parameters.coords = _.map(param.split(','), filterNumber);
@@ -51,7 +51,7 @@ class BBOXFilter implements Filter {
 export class BBOXFilterProvider implements FilterProvider {
     parseFilter(req : express.Request, collection : Collection) : Filter {
         if (_.isString(req.query['bbox'])) {
-            return new BBOXFilter(req.query['bbox'], req.query['bbox-crs']);
+            return new BBOXFilter(String(req.query['bbox']), String(req.query['bbox-crs']));
         }
         return null;
     }

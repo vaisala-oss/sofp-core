@@ -1,4 +1,4 @@
-import {Backend, Collection, FeatureCursor, Filter, Query} from 'sofp-lib';
+import {Backend, AuthorizerProvider, Collection, FeatureCursor, Filter, Query} from 'sofp-lib';
 import * as _ from 'lodash';
 
 /**
@@ -6,9 +6,12 @@ import * as _ from 'lodash';
  **/
 export class Server {
     backends : Backend[];
+    authorizerProvider : AuthorizerProvider;
 
-    constructor(backends : Backend[] = []) {
-        this.backends = backends;
+    constructor(params? : { backends? : Backend[], authorizerProvider? : AuthorizerProvider }) {
+        params = params || {};
+        this.backends = params.backends || [];
+        this.authorizerProvider = params.authorizerProvider;
     }
 
     getCollections() : Collection[] {
@@ -33,44 +36,6 @@ export class Server {
                 }
             }
         }
-    };
-
-    executeQuery(query : Query) : FeatureCursor {
-        let collection = this.getCollection(query.featureName);
-
-        let cursor = collection.executeQuery(query);
-
-        function getNextFiltered() {
-            let ret = null;
-            do {
-                // Original cursor is empty => return
-                if (!cursor.hasNext()) return null;
-
-                // Get next feature
-                ret = cursor.next();
-
-                // Test with filters, if not accepted => null
-                // TODO: This must be done in a web worker / thread
-                if (_.find(cursor.remainingFilter, function(filter) { return !filter.accept(ret); })) {
-                    ret = null;
-                }
-
-            } while(ret === null || ret === undefined);
-
-            return ret;
-        }
-
-        let nextFeature = getNextFiltered();
-
-        return {
-            hasNext: () => (nextFeature !== null && nextFeature !== undefined),
-            next: () => {
-                let ret = nextFeature;
-                nextFeature = getNextFiltered();
-                return ret;
-            },
-            remainingFilter: []
-        };
     };
 };
 

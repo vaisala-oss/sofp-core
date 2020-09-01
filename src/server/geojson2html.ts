@@ -7,6 +7,7 @@ import { json2html } from './json2html';
 import * as _ from 'lodash';
 
 export class geojson2html {
+    private statusCode : number;
     private response : Response;
     private collection : Collection;
 
@@ -18,7 +19,8 @@ export class geojson2html {
         this.jsonString = [];
     }
 
-    writeHead(statusCode : Number, headers : any) {
+    writeHead(statusCode : number, headers : any) {
+        this.statusCode = statusCode;
         const modifiedHeaders = _.pickBy(headers, (v, k) => k.toLowerCase() !== 'content-type' );
         modifiedHeaders['Content-Type'] = 'text/html; charset=utf-8';
 
@@ -30,11 +32,21 @@ export class geojson2html {
     }
 
     end() {
+        if (this.statusCode >= 500 && this.statusCode <= 599) {
+            this.response.write(this.jsonString.join(''));
+            this.response.end();
+            return;
+        }
         const data = JSON.parse(this.jsonString.join(''));
         
-        const html = json2html(data, {
-            title: 'Data' + (this.collection.id ? ' from collection "'+this.collection.id+'"' : '')
-        });
+        const options = {};
+        if (data.collection) {
+            options['title'] = 'Data' + (this.collection.id ? ' from collection "'+this.collection.id+'"' : '');
+        } else if (data.id) {
+            options['title'] = 'Feature ' + data.id;
+        }
+
+        const html = json2html(data, options);
         
         this.response.end(html);
     }

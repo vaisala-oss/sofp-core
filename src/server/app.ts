@@ -1,23 +1,13 @@
 // Use source maps in the app, so that node reports typescript source code files & line numbers
 require('source-map-support').install();
 
-import {Server} from './server';
-import {API} from './api';
-
 import * as _ from 'lodash';
-
-import * as express from 'express';
-import * as http from 'http';
-
 import * as BackendLoader from './backend_loader';
 
-import * as commander from 'commander';
-import * as morgan from 'morgan';
-import RotatingFileStream from 'rotating-file-stream';
-import * as path from 'path';
-import * as fs from 'fs';
+import {Backend, AuthorizerProvider} from 'sofp-lib';
+import {Parameters, run} from './index';
 
-const program = commander
+var program = require('commander')
   .command('sofp-core')
   .usage('[options] <path-to-backend ...>')
   .option('-p, --port [number]', 'Port number to listen (default 3000)')
@@ -25,11 +15,17 @@ const program = commander
   .option('-a, --accessLog [file]', 'Write access log to file (default: no log)')
   .option('-t, --title [service title]', 'Set title of the service')
   .option('-d, --desc [service description]', 'Set description of the service')
+  .option('-x, --authorizer [authorizer module name]', 'Load authorizer')
   .parse(process.argv);
 
-const serverPort = program.port || 3000;
+let authorizerProvider : AuthorizerProvider;
 
-var backends;
+if (program.authorizer) {
+    console.log('Loading authorizer module: '+program.authorizer)
+    authorizerProvider = require(program.authorizer).authorizerProvider;
+}
+
+let backends : Backend[];
 if (program.args.length > 0) {
     // Load backends from command line paths. Useful when developing a backend
     backends = [];
@@ -48,49 +44,14 @@ if (program.args.length > 0) {
     }
 }
 
-const server = new Server(backends);
-
-const title = program.title || 'SOFP - OGC API Features';
-const description = program.desc || 'This server is an OGC API Features service';
-
-const api = new API(server, { title: String(title), description: String(description), contextPath: program.contextPath || '/sofp' });
-
-const app = express();
-
-if (program.accessLog) {
-    console.log('Writing access log to', program.accessLog, '(rotate daily)')
-    var accessLogStream = RotatingFileStream(path.basename(program.accessLog), {
-      interval: '1d', // rotate daily
-      path: path.dirname(program.accessLog)
-    });
-
-    app.use(morgan('combined', { stream: accessLogStream }));
+let params : Parameters = {
+  title:         program.title || 'Example SOFP Server',
+  description:   program.description || 'This is an example SOFP server',
+  serverPort:    program.port || 3000,
+  contextPath:   program.contextPath || '/sofp',
+  accessLogPath: program.accessLog,
+  backends:      backends,
+  authorizerProvider: authorizerProvider
 }
 
-// Pretty-print
-app.set('json spaces', 2);
-
-api.connectExpress(app);
-
-
-app.use((req, res) => {
-    res.status(404).json({message: 'Not found'});
-});
-
-app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({message: 'Internal error: '+err.message});
-});
-
-const httpServer = http.createServer(app);
-httpServer.listen(serverPort);
-
-console.log('Listening on port '+serverPort);
-console.log('Active backends ('+server.backends.length+') and their collections:');
-_.each(server.backends, (backend) => {
-    console.log('  - '+backend.name);
-    _.each(backend.collections, (collection) => {
-        console.log('     |- '+collection.id);
-    });
-});
-console.log('Try visiting http://localhost:'+serverPort+api.contextPath);
+run(params);

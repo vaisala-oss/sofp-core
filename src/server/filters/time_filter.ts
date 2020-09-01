@@ -16,7 +16,7 @@ class TimeFilter implements Filter {
         timePropertyNames: null
     };
     options : object;
-    asQuery : string;
+    query : any;
 
     accept = function(f : Feature) {
         var propertiesAsMoments = _.reduce(f.properties, (memo, v, k) => {
@@ -56,7 +56,7 @@ class TimeFilter implements Filter {
 
     constructor(timeString, options, timePropertyNames) {
         this.options = options;
-        this.asQuery = 'time='+encodeURIComponent(timeString);
+        this.query = { 'datetime': timeString };
         this.parameters.timeString = timeString;
         if (_.isArray(timePropertyNames)) {
             this.parameters.timePropertyNames = _.map(timePropertyNames, str => str.toLowerCase());
@@ -75,7 +75,7 @@ class TimeFilter implements Filter {
                     periodPart = 'P0M0DT'+periodPart.substring(1);
                 }
                 this.parameters.duration = moment.duration(periodPart);
-                this.parameters.momentEnd = moment.utc(moment(this.parameters.momentStart)).add(this.parameters.duration);
+                this.parameters.momentEnd = moment.utc(this.parameters.momentStart).add(this.parameters.duration);
             } else {
                 this.parameters.momentEnd = moment.utc(parts[1], moment.ISO_8601);
                 this.parameters.duration = moment.duration(this.parameters.momentEnd.diff(this.parameters.momentStart));
@@ -100,8 +100,8 @@ export class TimeFilterProvider implements FilterProvider {
     }
 
     parseFilter(req : express.Request, collection : Collection) : Filter {
-        if (req.query.time) {
-            return new TimeFilter(req.query.time, this.options, collection.timePropertyNames);
+        if (req.query.datetime) {
+            return new TimeFilter(req.query.datetime, this.options, collection.timePropertyNames);
         }
         return null;
     }

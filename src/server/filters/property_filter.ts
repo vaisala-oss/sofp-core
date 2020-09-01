@@ -1,5 +1,6 @@
 import {Feature, Filter, Collection} from 'sofp-lib';
 import {FilterProvider} from '../filter_provider';
+import {reservedParameterNames} from '../constants';
 
 import * as express from 'express';
 import * as _ from 'lodash';
@@ -9,7 +10,7 @@ class PropertyFilter implements Filter {
     parameters = {
         properties: null
     };
-    asQuery : string;
+    query : any;
 
     accept = function(f : Feature) {
         if (!f.properties && _.size(this.parameters.properties) > 0) {
@@ -26,12 +27,12 @@ class PropertyFilter implements Filter {
     }
 
     constructor(properties) {
-        this.asQuery = _.map(properties, (v, k) => encodeURIComponent(k)+'='+encodeURIComponent(v) ).join('&');
+        this.query = _.cloneDeep(properties);
         this.parameters.properties = properties;
     }
 };
 
-const reservedParameterNames = [ 'nexttoken', 'prev', 'limit', 'bbox', 'bbox-crs', 'time' ];
+
 
 export class PropertyFilterProvider implements FilterProvider {
     parseFilter(req : express.Request, collection : Collection) : Filter {
@@ -50,5 +51,3 @@ export class PropertyFilterProvider implements FilterProvider {
         return null;
     }
 };
-
-

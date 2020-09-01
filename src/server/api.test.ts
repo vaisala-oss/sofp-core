@@ -1,11 +1,12 @@
 import {API, deduceContextPath} from './api';
+import {Collection} from 'sofp-lib';
 import {Server} from './server';
 
 import * as _ from 'lodash';
 
-const MockServer = jest.fn<Server>(() => ({
-    getCollections: () => []
-}));
+class MockServer extends Server {
+    getCollections: () => ([])
+};
 
 /**
  * The content of that response SHALL be based upon the OpenAPI 3.0 schema root.yaml and include at least links to 
@@ -24,11 +25,11 @@ test('Content specific tests for requirement 2: /req/core/root-success', () => {
 
     let linksByRel = _.reduce(response.links, (memo, link) => { memo[link.rel+'#'+link.type] = link; return memo; }, {});
 
-    expect(linksByRel['service-desc#application/openapi+json;version=3.0']).toBeDefined();
-    expect(linksByRel['service-desc#application/openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api');
+    expect(linksByRel['service-desc#application/vnd.oai.openapi+json;version=3.0']).toBeDefined();
+    expect(linksByRel['service-desc#application/vnd.oai.openapi+json;version=3.0'].href).toBe('http://foo.com:1024/api');
 
-    expect(linksByRel['service-desc#application/openapi+yaml;version=3.0']).toBeDefined();
-    expect(linksByRel['service-desc#application/openapi+yaml;version=3.0'].href).toBe('http://foo.com:1024/api.yaml');
+    expect(linksByRel['service-desc#application/vnd.oai.openapi;version=3.0']).toBeDefined();
+    expect(linksByRel['service-desc#application/vnd.oai.openapi;version=3.0'].href).toBe('http://foo.com:1024/api.yaml');
 
     expect(linksByRel['service-doc#text/html']).toBeDefined();
     expect(linksByRel['service-doc#text/html'].href).toBe('http://foo.com:1024/api.html');
@@ -78,7 +79,7 @@ let api = new API(new MockServer(), { contextPath: '' });
 
 test('Server collection response should only include API fields, not "private" fields', () => {
 
-    const MockServer2 = jest.fn<Server>(() => ({
+    const MockServer2 = jest.fn().mockImplementation(() => ({
         getCollections: () => [{
             id: 'foo',
             title: 'blaa',

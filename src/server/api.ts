@@ -1,6 +1,6 @@
 import {Server} from './server';
 import {FilterProvider} from './filter_provider';
-import {Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
+import {Authorizer, Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
 
 import { OpenAPI } from './openapi';
 
@@ -12,6 +12,8 @@ import { json2html } from './json2html';
 import { geojson2html } from './geojson2html';
 
 import {filterProviders} from './filters/';
+import {reservedParameterNames} from './constants';
+
 
 /**
  * The API class provides accessors to produce metadata for the OGC API Features service. The API class wraps a Server object 
@@ -80,7 +82,7 @@ export class API {
     constructor(server : Server, params : APIParameters) {
         this.server = server;
         this.title = params.title;
-	this.description = params.description;
+        this.description = params.description;
         this.contextPath = params.contextPath || '';
 
         this.responseCache = {};
@@ -93,15 +95,14 @@ export class API {
         }
     }
 
-    identifyResponseFormat(req : express.req) {
+    identifyResponseFormat(req : express.Request) {
         // select output format, query parameter 'f' value is primary, accept text/html secondayr, json is default
         let acceptsHtml = (req.headers['accept'] || '').toLowerCase().split(',').indexOf('text/html') !== -1;
         let requestedFormat = req.query['f'];
         if (_.isArray(requestedFormat)) {
-            requestedFormat = requestedFormat[requestedFormat.length-1];
+            requestedFormat = requestedFormat[Number(requestedFormat.length)-1];
         }
-        requestedFormat = (requestedFormat || '').toLowerCase();
-
+        requestedFormat = String(requestedFormat || '').toLowerCase();
         let format;
 
         if (requestedFormat === 'html') {
@@ -114,8 +115,18 @@ export class API {
         return format;
     }
 
-    connectExpress(app: express) : void {
-        let produceRequestParameters = (req: express.req) : RequestParameters => {
+    produceAuthorizer(req : express.Request, collection : Collection) : Promise<Authorizer> {
+        if (this.server.authorizerProvider) {
+            return this.server.authorizerProvider.createAuthorizer(req, collection);
+        }
+
+        return new Promise((resolve, reject) => {
+            resolve(null);
+        });
+    }
+
+    connectExpress(app: express.Application) : void {
+        let produceRequestParameters = (req: express.Request) : RequestParameters => {
             let protocol = req.headers['x-forwarded-proto'] || req.protocol;
             let host = req.headers['x-forwarded-host'];
             if (host) {
@@ -134,7 +145,7 @@ export class API {
             return ret;
         }
 
-        let sendResponse = (req : express.req, res, jsonResponse) => {
+        let sendResponse = (req : express.Request, res, jsonResponse) => {
             const format = this.identifyResponseFormat(req);
 
             if (format === 'HTML') {
@@ -166,18 +177,59 @@ export class API {
             sendResponse(req, res, response);
         });
 
-        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items/:itemId', (req, res, next) => {
+        app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items/:itemId', (req, response, next) => {
+            let params = produceRequestParameters(req);
+            let res;
+
+            if (params.responseFormat === 'HTML') {
+                res = new geojson2html(response, params.collection);
+            } else if (params.responseFormat === 'JSON' || params.responseFormat === undefined) {
+                res = response;
+            } else {
+                throw Error('Unknown response format '+params.responseFormat);
+            }
+
             let collection = this.server.getCollection(req.params.id);
             if (!collection) {
                 return next();
             }
 
-            collection.getFeatureById(req.params.itemId).then(f => {
+            Promise.all([
+                collection.getFeatureById(req.params.itemId),
+                this.produceAuthorizer(req, collection)
+            ]).then(([f, authorizer]) => {
                 if (!f) {
                     return next();
                 }
-                res.json(f);
-            }).catch(next);
+                if (authorizer && !authorizer.accept(f.feature)) {
+                    return next();
+                }
+                var tmp = _.extend({}, f, {
+                    links: [{
+                        href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=json`,
+                        rel: 'self',
+                        type: 'application/geo+json',
+                        title: 'Link to this feature in JSON format'
+                    },{
+                        href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=html`,
+                        rel: 'alternate',
+                        type: 'text/html',
+                        title: 'Link to this feature in HTML format'
+                    },{
+                        href: `${params.baseUrl}/collections/${collection.id}`,
+                        rel: 'collection',
+                        type: 'application/json',
+                        title: 'Metadata about the feature collections this feature belongs to'
+                    }]
+                });
+
+                var json = JSON.stringify(tmp, null, '\t');
+                json = json.replace(/^\t/gm, '\t\t');
+                json = json.substring(0,json.length-1)+'\t}';
+
+                res.write(json);
+                res.end();
+            }).catch(next); // NOTE: if user is unauthorized, it will appear as a 404
         });
 
         app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items', (req, res, next) => {
@@ -186,18 +238,53 @@ export class API {
                 return next();
             }
             
-            let filters = this.parseFilters(req, collection);
-            const query : Query = {
-                limit:     req.query.limit ? Number(req.query.limit) : 10,
-                nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
-                filters: filters
-            };
+            this.produceAuthorizer(req, collection).then(authorizer => {
+                let filters : Filter[];
 
-            const stream : FeatureStream = collection.executeQuery(query);
-            var params : RequestParameters = produceRequestParameters(req);
-            params.collection = collection;
-            params.itemQuery = query;
-            this.produceOutput(params, stream, res);
+                try {
+                    filters = this.parseFilters(req, collection);
+                } catch(e) {
+                    return res.status(400).send('Illegal parameter(s), error message: '+e);
+                }
+
+                if (authorizer) {
+                    filters.push(authorizer);
+                }
+
+                // Check that limit is indeed a number (part of requirement /req/core/query-param-invalid)
+                if (req.query.limit !== undefined && !_.isNumber(req.query.limit)) {
+                    if (!/^[0-9]+$/.exec(String(req.query.limit))) {
+                        return res.status(400).send('limit should be a number');
+                    }
+                }
+
+                // Check that property filters are in-line with schema (requirement /req/core/query-param-unknown)
+                var unprocessedParameters = {};
+                _.each(req.query, (v, k) => unprocessedParameters[k.toLowerCase()] = true);
+                _.each(reservedParameterNames, r => delete unprocessedParameters[r]);
+                _.each(filters, f => {
+                    _.each(f.query, (v, k) => delete unprocessedParameters[k.toLowerCase()]);
+                });
+
+                if (_.size(unprocessedParameters) > 0) {
+                    return res.status(400).send('Unknown parameter(s): '+JSON.stringify(unprocessedParameters));
+                }
+
+                const query : Query = {
+                    limit:     req.query.limit ? Number(req.query.limit) : 10,
+                    nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
+                    filters: filters
+                };
+
+                const stream : FeatureStream = collection.executeQuery(query);
+                var params : RequestParameters = produceRequestParameters(req);
+                params.collection = collection;
+                params.itemQuery = query;
+                this.produceOutput(params, stream, res);
+            }).catch(err => {
+                return res.status(401).send('Authorization failed: '+err);
+            });
+
         });
 
         app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)', (req, res, next) => {
@@ -206,7 +293,7 @@ export class API {
                 return next();
             }
             
-            let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req), collection);
+            let response = this.getFeatureCollectionMetadata(produceRequestParameters(req), collection);
             sendResponse(req, res, response);
         });
 
@@ -267,12 +354,12 @@ export class API {
             },{
                 href: params.baseUrl + '/api',
                 rel: 'service-desc',
-                type: 'application/openapi+json;version=3.0',
+                type: 'application/vnd.oai.openapi+json;version=3.0',
                 title: 'the API definition (JSON)',
             },{
                 href: params.baseUrl + '/api.yaml',
                 rel: 'service-desc',
-                type: 'application/openapi+yaml;version=3.0',
+                type: 'application/vnd.oai.openapi;version=3.0',
                 title: 'the API definition (YAML)',
             },{
                 href: params.baseUrl + '/api.html',
@@ -299,23 +386,37 @@ export class API {
     }
 
     /**
-     * Return object following the WFS 3.0.0 draft 1 specification for feature collections metadata
+     * Convert Collection object to the format used in collections and collection API responses
+     **/
+    collectionToResponse(c : Collection) : any {
+        return {
+            'id': c.id,
+            'title': c.title,
+            'description': c.description,
+            'links': c.links,
+            'extent': c.extent,
+            'crs': c.crs
+        };
+    }
+
+    /**
+     * Return object following the OGC API Features specification for feature collections metadata
      * @link https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_feature_collections_metadata
      */ 
-    getFeatureCollectionsMetadata(params : RequestParameters, collection? : Collection) : APIResponse {
-        var collections = collection ? [ collection ] : this.server.getCollections();
-        collections = _.map(collections, c => { return { 'id': c.id, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
+    getFeatureCollectionsMetadata(params : RequestParameters) : APIResponse {
+        //var collections = _.map(this.server.getCollections(), c => { return { 'id': c.id, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
+        var collections = _.map(this.server.getCollections(), this.collectionToResponse);
         collections = _.cloneDeep(collections);
 
         let ret : APIResponse = {
             links: [{
-                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.id) : ''),
+                href: params.baseUrl + '/collections',
                 rel: 'self',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
             },{
-                href: params.baseUrl + '/collections' + (collection ? ('/' + collection.id) : '') + '?f=html',
-                rel: 'self',
+                href: params.baseUrl + '/collections?f=html',
+                rel: 'alternate',
                 type: 'text/html',
                 title: 'Metadata about the feature collections'
             }],
@@ -324,17 +425,47 @@ export class API {
 
         _.each(collections, (collection) => {
             collection.links.unshift({
-                href: params.baseUrl + '/collections/'+collection.id+'/items',
-                rel: 'item',
+                href: params.baseUrl + '/collections/'+collection.id+'/items?f=json',
+                rel: 'items',
                 type: 'application/geo+json',
                 title: collection.title
             });
             collection.links.unshift({
                 href: params.baseUrl + '/collections/'+collection.id+'/items?f=html',
-                rel: 'item',
+                rel: 'items',
                 type: 'text/html',
                 title: collection.title
             });
+        });
+
+        return ret;
+    }
+
+    getFeatureCollectionMetadata(params : RequestParameters, collection : Collection) : APIResponse {
+        let ret : APIResponse = {};
+
+        _.extend(ret, this.collectionToResponse(collection), {
+            links: [{
+                href: params.baseUrl + `/collections/${collection.id}`,
+                rel: 'self',
+                type: 'application/json',
+                title: 'Metadata about this feature collection'
+            },{
+                href: params.baseUrl + `/collections/${collection.id}?f=html`,
+                rel: 'alternate',
+                type: 'text/html',
+                title: 'Metadata about this feature collection'
+            },{
+                href: params.baseUrl + `/collections/${collection.id}/items?f=json`,
+                rel: 'items',
+                type: 'application/geo+json',
+                title: collection.title
+            },{
+                href: params.baseUrl + `/collections/${collection.id}/items?f=html`,
+                rel: 'items',
+                type: 'text/html',
+                title: collection.title
+            }]
         });
 
         return ret;
@@ -352,7 +483,7 @@ export class API {
 
     produceOutput(params : RequestParameters, stream : FeatureStream, response : express.Response) {
         var n = 0;
-        var lastItem : Item = undefined;
+        var receivedError : Error = null;
 
         let res : express.Response | geojson2html;
 
@@ -382,7 +513,6 @@ export class API {
         }
 
         stream.on('data', (d : Item) => {
-            lastItem = d;
             if (n === 0) {
                 startResponse(res);
             } else {
@@ -395,12 +525,29 @@ export class API {
             n++;
         });
 
-        stream.on('error', err => {
-            // TODO: how to handle the error case? We might have streamed content already out?
+        stream.on('error', (err : Error) => {
             console.error('Received error from backend', err);
+            receivedError = err;
         });
 
         stream.on('end', () => {
+            // the 'error' event happens immediately after 'end', so by
+            // delaying the closeStream function call, we can handle the
+            // error condition when actually closing the stream
+            setTimeout(closeStream);
+        });
+
+        function closeStream() {
+            if (receivedError) {
+                if (n === 0) {
+                    res.writeHead(503, {});
+                    res.write('Internal error');
+                } else {
+                    res.write('\nInternal error');
+                }
+                res.end();
+                return;
+            }
             if (n === 0) {
                 startResponse(res);
             }
@@ -408,7 +555,7 @@ export class API {
             res.write('\t"timeStamp": "'+new Date().toISOString()+'",\n');
             res.write('\t"links": [');
 
-            var queryString = _.map(params.itemQuery.filters, f => f.asQuery);
+            var queryString = _.filter(_.map(params.itemQuery.filters, f => _.map(f.query, (v,k) => encodeURIComponent(k) + '=' + encodeURIComponent(v))), s => _.isObject(s) && s !== '');
             queryString.push('limit=' + params.itemQuery.limit);
             var nextTokenIndex;
             if (params.itemQuery.nextToken) {
@@ -420,23 +567,31 @@ export class API {
                 queryString.join('&');
 
             res.write('{\n');
-            res.write('\t\t"href": '+JSON.stringify(selfUri)+',\n');
-            res.write('\t\t"rel": "self",\n');
+            res.write('\t\t"href": '+JSON.stringify(selfUri+'&f=json')+',\n');
+            if (params.responseFormat === 'HTML') {
+                res.write('\t\t"rel": "alternate",\n');
+            } else {
+                res.write('\t\t"rel": "self",\n');
+            }
             res.write('\t\t"type":"application/geo+json",\n');
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
             res.write(',{\n');
             res.write('\t\t"href": '+JSON.stringify(selfUri+'&f=html')+',\n');
-            res.write('\t\t"rel": "self",\n');
+            if (params.responseFormat === 'HTML') {
+                res.write('\t\t"rel": "self",\n');
+            } else {
+                res.write('\t\t"rel": "alternate",\n');
+            }
             res.write('\t\t"type":"text/html",\n');
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
 
-            if (n === params.itemQuery.limit && lastItem.nextToken !== undefined && lastItem.nextToken !== null) {
+            if (n === params.itemQuery.limit && stream.lastPushedItem && stream.lastPushedItem.nextToken !== undefined && stream.lastPushedItem.nextToken !== null) {
                 if (nextTokenIndex === undefined) {
                     nextTokenIndex = queryString.length;
                 }
-                queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(lastItem.nextToken);
+                queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(stream.lastPushedItem.nextToken);
                 var nextUri = params.baseUrl + '/collections/' + params.collection.id + '/items?' +
                     queryString.join('&');
 
@@ -459,7 +614,7 @@ export class API {
             res.write('\t"numberReturned": '+n+'\n');
             res.write('}\n');
             res.end();
-        });
+        }
     }
 };
 
