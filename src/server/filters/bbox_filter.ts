@@ -51,7 +51,7 @@ class BBOXFilter implements Filter {
 export class BBOXFilterProvider implements FilterProvider {
     parseFilter(req : express.Request, collection : Collection) : Filter {
         if (_.isString(req.query['bbox'])) {
-            return new BBOXFilter(req.query['bbox'], req.query['bbox-crs']);
+            return new BBOXFilter(String(req.query['bbox']), String(req.query['bbox-crs']));
         }
         return null;
     }

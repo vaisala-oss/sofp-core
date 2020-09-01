@@ -95,15 +95,14 @@ export class API {
         }
     }
 
-    identifyResponseFormat(req : express.req) {
+    identifyResponseFormat(req : express.Request) {
         // select output format, query parameter 'f' value is primary, accept text/html secondayr, json is default
         let acceptsHtml = (req.headers['accept'] || '').toLowerCase().split(',').indexOf('text/html') !== -1;
         let requestedFormat = req.query['f'];
         if (_.isArray(requestedFormat)) {
-            requestedFormat = requestedFormat[requestedFormat.length-1];
+            requestedFormat = requestedFormat[Number(requestedFormat.length)-1];
         }
-        requestedFormat = (requestedFormat || '').toLowerCase();
-
+        requestedFormat = String(requestedFormat || '').toLowerCase();
         let format;
 
         if (requestedFormat === 'html') {
@@ -116,7 +115,7 @@ export class API {
         return format;
     }
 
-    produceAuthorizer(req : express.req, collection : Collection) : Promise<Authorizer> {
+    produceAuthorizer(req : express.Request, collection : Collection) : Promise<Authorizer> {
         if (this.server.authorizerProvider) {
             return this.server.authorizerProvider.createAuthorizer(req, collection);
         }
@@ -126,8 +125,8 @@ export class API {
         });
     }
 
-    connectExpress(app: express) : void {
-        let produceRequestParameters = (req: express.req) : RequestParameters => {
+    connectExpress(app: express.Application) : void {
+        let produceRequestParameters = (req: express.Request) : RequestParameters => {
             let protocol = req.headers['x-forwarded-proto'] || req.protocol;
             let host = req.headers['x-forwarded-host'];
             if (host) {
@@ -146,7 +145,7 @@ export class API {
             return ret;
         }
 
-        let sendResponse = (req : express.req, res, jsonResponse) => {
+        let sendResponse = (req : express.Request, res, jsonResponse) => {
             const format = this.identifyResponseFormat(req);
 
             if (format === 'HTML') {
@@ -230,7 +229,7 @@ export class API {
 
                 res.write(json);
                 res.end();
-            }).catch(next);
+            }).catch(next); // NOTE: if user is unauthorized, it will appear as a 404
         });
 
         app.get(this.contextPath + 'collections/:id([a-z0-9-/]*?)/items', (req, res, next) => {
@@ -254,7 +253,7 @@ export class API {
 
                 // Check that limit is indeed a number (part of requirement /req/core/query-param-invalid)
                 if (req.query.limit !== undefined && !_.isNumber(req.query.limit)) {
-                    if (!/^[0-9]+$/.exec(req.query.limit)) {
+                    if (!/^[0-9]+$/.exec(String(req.query.limit))) {
                         return res.status(400).send('limit should be a number');
                     }
                 }
@@ -282,6 +281,8 @@ export class API {
                 params.collection = collection;
                 params.itemQuery = query;
                 this.produceOutput(params, stream, res);
+            }).catch(err => {
+                return res.status(401).send('Authorization failed: '+err);
             });
 
         });
@@ -539,7 +540,7 @@ export class API {
         function closeStream() {
             if (receivedError) {
                 if (n === 0) {
-                    res.writeHead(503);
+                    res.writeHead(503, {});
                     res.write('Internal error');
                 } else {
                     res.write('\nInternal error');

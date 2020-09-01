@@ -1,9 +1,12 @@
 import {TimeFilterProvider} from './time_filter';
 
+import * as express from 'express';
+
 const provider = new TimeFilterProvider();
 
 test('Test parse just date', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-02-12T23:20:50Z' }}, {});
+    let req : unknown = { query: { datetime: '2018-02-12T23:20:50Z' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
     
     expect(filter.parameters.momentStart.year()).toBe(2018);
     expect(filter.parameters.momentStart.month()).toBe(1); // January = 0
@@ -22,7 +25,8 @@ test('Test parse just date', () => {
 
 
 test('Test parse period between two dates', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-03-12T00:00:00Z/2018-03-18T04:01:12Z' }}, {});
+    let req : unknown = { query: { datetime: '2018-03-12T00:00:00Z/2018-03-18T04:01:12Z' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
     
     expect(filter.parameters.momentStart.year()).toBe(2018);
     expect(filter.parameters.momentStart.month()).toBe(2); // January = 0
@@ -51,7 +55,8 @@ test('Test parse period between two dates', () => {
 
 
 test('Test parse date + duration', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-02-12T00:00:00Z/P0M6DT12H31M12S' }}, {});
+    let req : unknown = { query: { datetime: '2018-02-12T00:00:00Z/P0M6DT12H31M12S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
     
     expect(filter.parameters.momentStart.year()).toBe(2018);
     expect(filter.parameters.momentStart.month()).toBe(1); // January = 0
@@ -79,7 +84,8 @@ test('Test parse date + duration', () => {
 });
 
 test('Test parse date + duration with no month/day part', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-02-12T00:00:00Z/P12H31M12S' }}, {});
+    let req : unknown = { query: { datetime: '2018-02-12T00:00:00Z/P12H31M12S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
     
     expect(filter.parameters.momentStart.year()).toBe(2018);
     expect(filter.parameters.momentStart.month()).toBe(1); // January = 0
@@ -108,7 +114,8 @@ test('Test parse date + duration with no month/day part', () => {
 
 
 test('Test duration with month', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-02-12T00:00:00Z/P7M6DT12H31M12S' }}, {});
+    let req : unknown = { query: { datetime: '2018-02-12T00:00:00Z/P7M6DT12H31M12S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
     
     expect(filter.parameters.momentStart.year()).toBe(2018);
     expect(filter.parameters.momentStart.month()).toBe(1); // January = 0
@@ -132,7 +139,8 @@ test('Test duration with month', () => {
 });
 
 test('One hour duration', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2019-04-11T00:00:00Z/PT1H' }}, {});
+    let req : unknown = { query: { datetime: '2019-04-11T00:00:00Z/PT1H' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
     
     expect(filter.parameters.momentStart.year()).toBe(2019);
     expect(filter.parameters.momentStart.month()).toBe(3); // January = 0
@@ -158,35 +166,40 @@ test('One hour duration', () => {
 
 
 test('Test filter (not accept 1s before exact start date)', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField: '2017-12-31T23:59:59Z' } };
     expect(filter.accept(feature)).toBeFalsy();
 });
 
 test('Test filter (accept exact start date)', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField: '2018-01-01T00:00:00Z' } };
     expect(filter.accept(feature)).toBeTruthy();
 });
 
 test('Test filter (accept date between start and end)', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField: '2018-01-01T06:10:42Z' } };
     expect(filter.accept(feature)).toBeTruthy();
 });
 
 test('Test filter (accept date exactly at end)', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT7H8M9S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT7H8M9S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField: '2018-01-02T07:08:09Z' } };
     expect(filter.accept(feature)).toBeTruthy();
 });
 
 test('Test filter (not accept 1s after exact end date)', () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT7H8M9S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT7H8M9S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField: '2018-01-02T07:08:10Z' } };
     expect(filter.accept(feature)).toBeFalsy();
@@ -195,7 +208,8 @@ test('Test filter (not accept 1s after exact end date)', () => {
 
 test('Test filter, no time features, provider configured to accept', () => {
     let provider2 = new TimeFilterProvider(true);
-    let filter = provider2.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider2.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { x: 'y' } };
     expect(filter.accept(feature)).toBeTruthy();
@@ -203,28 +217,32 @@ test('Test filter, no time features, provider configured to accept', () => {
 
 test('Test filter, no time features, provider configured to not accept', () => {
     let provider2 = new TimeFilterProvider(false);
-    let filter = provider2.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider2.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { x: 'y' } };
     expect(filter.accept(feature)).toBeFalsy();
 });
 
 test('Test filter with multiple timefields, all within filter bounds => accept' , () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField1: '2018-01-01T06:10:42Z', timeField2: '2018-01-01T09:11:22Z' } };
     expect(filter.accept(feature)).toBeTruthy();
 });
 
 test('Test filter with multiple timefields, one outside filter bounds => reject' , () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, {});
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider.parseFilter(<express.Request>req, {});
 
     let feature = { properties: { timeField1: '2018-01-01T06:10:42Z', timeField2: '2017-01-01T09:11:22Z' } };
     expect(filter.accept(feature)).toBeFalsy();
 });
 
 test('Test filter with multiple timefields, one outside filter bounds but only one is set as a timefield => accept' , () => {
-    let filter = provider.parseFilter({ query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }}, { timePropertyNames: ['within'] });
+    let req : unknown = { query: { datetime: '2018-01-01T00:00:00Z/P0M1DT0H0M0S' }};
+    let filter = provider.parseFilter(<express.Request>req, { timePropertyNames: ['within'] });
 
     let feature = { properties: { within: '2018-01-01T06:10:42Z', outside: '2017-01-01T09:11:22Z' } };
     expect(filter.accept(feature)).toBeTruthy();

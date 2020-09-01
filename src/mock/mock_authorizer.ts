@@ -3,10 +3,10 @@ import { AuthorizerProvider, Authorizer, Collection, Feature } from 'sofp-lib';
 import * as express from 'express';
 
 export class MockAuthorizer extends Authorizer {
-    filterClass : String = 'MockAuthorizer';
-    unitOfMeasureName : String;
+    filterClass : string = 'MockAuthorizer';
+    unitOfMeasureName : string;
 
-    constructor(unitOfMeasureName : String) {
+    constructor(unitOfMeasureName : string) {
         super();
         this.unitOfMeasureName = unitOfMeasureName;
     }
@@ -19,7 +19,10 @@ export class MockAuthorizer extends Authorizer {
 export const authorizerProvider : AuthorizerProvider = {
     createAuthorizer(req : express.Request, collection : Collection) : Promise<Authorizer> {
         return new Promise((resolve, reject) => {
-            var unitOfMeasureName : String = req.headers['authuom'];
+            var unitOfMeasureName : string | string[] = req.headers['authuom'];
+            if (Array.isArray(unitOfMeasureName)) {
+                unitOfMeasureName = unitOfMeasureName[0];
+            }
             resolve(new MockAuthorizer(unitOfMeasureName));
         });
     }
