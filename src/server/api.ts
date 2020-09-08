@@ -555,7 +555,9 @@ export class API {
             res.write('\t"timeStamp": "'+new Date().toISOString()+'",\n');
             res.write('\t"links": [');
 
-            var queryString = _.filter(_.map(params.itemQuery.filters, f => _.map(f.query, (v,k) => encodeURIComponent(k) + '=' + encodeURIComponent(v))), s => _.isObject(s) && s !== '');
+            var queryString = _.map(params.itemQuery.filters, f => _.map(f.query, (v,k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)));
+            queryString = _.filter(_.flatten(queryString), s => s !== '');
+
             queryString.push('limit=' + params.itemQuery.limit);
             var nextTokenIndex;
             if (params.itemQuery.nextToken) {
