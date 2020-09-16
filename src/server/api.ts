@@ -1,11 +1,12 @@
 import {Server} from './server';
 import {FilterProvider} from './filter_provider';
-import {Authorizer, Collection, FeatureStream, Filter, Item, Link, Query} from 'sofp-lib';
+import {Authorizer, Collection, FeatureStream, Filter, Item, Link, PropertyReference, Query} from 'sofp-lib';
 
 import { OpenAPI } from './openapi';
 
 import * as _ from 'lodash';
 import * as express from 'express';
+import produce from 'immer';
 
 import { json2html } from './json2html';
 
@@ -13,7 +14,6 @@ import { geojson2html } from './geojson2html';
 
 import {filterProviders} from './filters/';
 import {reservedParameterNames} from './constants';
-
 
 /**
  * The API class provides accessors to produce metadata for the OGC API Features service. The API class wraps a Server object 
@@ -204,6 +204,7 @@ export class API {
                 if (authorizer && !authorizer.accept(f.feature)) {
                     return next();
                 }
+                f = this.resolveFeature(f, params);
                 var tmp = _.extend({}, f, {
                     links: [{
                         href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=json`,
@@ -481,6 +482,29 @@ export class API {
         };
     }
 
+    resolveFeature(feature, params : RequestParameters) {
+        return produce(feature, (feature) => {
+            _.each(feature.properties, (v, k) => {
+                if (v instanceof PropertyReference) {
+                    if (v.type !== 'Feature') {
+                        console.error(`ERROR! Backend supplied PropertyReference of type ${v.type} that core does not understand`);
+                        return;
+                    }
+                    if (!v.collection) {
+                        console.error('ERROR! Backend supplied PropertyReference with no collection');
+                        return;
+                    }
+                    if (!v.id) {
+                        console.error('ERROR! Backend supplied PropertyReference with no id');
+                        return;
+                    }
+                    var collectionId = v.collection.id || v.collection;
+                    feature.properties[k] = `${params.baseUrl}/collections/${collectionId}/items/${v.id}`;
+                }
+            });
+        });
+    }
+
     produceOutput(params : RequestParameters, stream : FeatureStream, response : express.Response) {
         var n = 0;
         var receivedError : Error = null;
@@ -518,7 +542,9 @@ export class API {
             } else {
                 res.write(',');
             }
-            var json = JSON.stringify(d.feature, null, '\t');
+            var feature = this.resolveFeature(d.feature, params);
+
+            var json = JSON.stringify(feature, null, '\t');
             json = json.replace(/^\t/gm, '\t\t');
             json = json.substring(0,json.length-1)+'\t}';
             res.write(json);
