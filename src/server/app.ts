@@ -12,7 +12,7 @@ var program = require('commander')
   .usage('[options] <path-to-backend ...>')
   .option('-p, --port [number]', 'Port number to listen (default 3000)')
   .option('-c, --contextPath [path]', 'Context path for the server (default /sofp)')
-  .option('-a, --accessLog [file]', 'Write access log to file (default: no log)')
+  .option('-a, --accessLog [file]', 'Write access log to file or "-" for stdout (default: no log)')
   .option('-t, --title [service title]', 'Set title of the service')
   .option('-d, --desc [service description]', 'Set description of the service')
   .option('-x, --authorizer [authorizer module name]', 'Load authorizer')
@@ -46,7 +46,7 @@ if (program.args.length > 0) {
 
 let params : Parameters = {
   title:         program.title || 'Example SOFP Server',
-  description:   program.description || 'This is an example SOFP server',
+  description:   program.desc || 'This is an example SOFP server',
   serverPort:    program.port || 3000,
   contextPath:   program.contextPath || '/sofp',
   accessLogPath: program.accessLog,

@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 
 import * as http from 'http';
 
-import * as morgan from 'morgan';
+import morgan from 'morgan';
 import RotatingFileStream from 'rotating-file-stream';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -19,7 +19,7 @@ export interface Parameters {
 
   serverPort : number;
   contextPath : string;
-  accessLogPath : string;
+  accessLogPath : string; // null/undefined for none, "-" for stdout, anything else is a path to the file
   backends : Backend[];
   authorizerProvider : AuthorizerProvider;
 }
@@ -39,12 +39,14 @@ export function run(params : Parameters) {
   const app = express();
 
   if (params.accessLogPath) {
-      console.log('Writing access log to', params.accessLogPath, '(rotate daily)')
-      var accessLogStream = RotatingFileStream(path.basename(params.accessLogPath), {
-        interval: '1d', // rotate daily
-        path: path.dirname(params.accessLogPath)
-      });
-
+      var accessLogStream;
+      if (params.accessLogPath !== '-') {
+        console.log('Writing access log to', params.accessLogPath, '(rotate daily)')
+        accessLogStream = RotatingFileStream(path.basename(params.accessLogPath), {
+          interval: '1d', // rotate daily
+          path: path.dirname(params.accessLogPath)
+        });
+      }
       app.use(morgan('combined', { stream: accessLogStream }));
   }
 
