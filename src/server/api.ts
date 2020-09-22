@@ -615,7 +615,7 @@ export class API {
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
 
-            if (n === params.itemQuery.limit && stream.lastPushedItem && stream.lastPushedItem.nextToken !== undefined && stream.lastPushedItem.nextToken !== null) {
+            if (stream.lastPushedItem && stream.lastPushedItem.nextToken !== undefined && stream.lastPushedItem.nextToken !== null) {
                 if (nextTokenIndex === undefined) {
                     nextTokenIndex = queryString.length;
                 }
