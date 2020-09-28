@@ -13,15 +13,61 @@ import * as fs from 'fs';
 
 const express = require('express');
 
+export interface ExpressServer {
+  app : any;
+  httpServer : http.Server;
+}
+
 export interface Parameters {
   title : string;
   description : string;
 
-  serverPort : number;
+  expressServer? : ExpressServer;
+  serverPort? : number;
+  accessLogPath? : string; // null/undefined for none, "-" for stdout, anything else is a path to the file
+
   contextPath : string;
-  accessLogPath : string; // null/undefined for none, "-" for stdout, anything else is a path to the file
   backends : Backend[];
   authorizerProvider : AuthorizerProvider;
+}
+
+export function createExpressServer(accessLogPath : string) : ExpressServer {
+  let app = express();
+
+  if (accessLogPath) {
+      var accessLogStream;
+      if (accessLogPath !== '-') {
+        console.log('Writing access log to', accessLogPath, '(rotate daily)')
+        accessLogStream = RotatingFileStream(path.basename(accessLogPath), {
+          interval: '1d', // rotate daily
+          path: path.dirname(accessLogPath)
+        });
+      }
+      app.use(morgan('combined', { stream: accessLogStream }));
+  }
+
+  app.set('json spaces', 2);
+
+  return {
+    app: app,
+    httpServer: null
+  };
+}
+
+export function startExpressServer(expressServer : ExpressServer, serverPort : number) {
+  expressServer.app.use((req, res) => {
+      res.status(404).json({message: 'Not found'});
+  });
+
+  expressServer.app.use((err, req, res, next) => {
+      console.error(err);
+      res.status(500).json({message: 'Internal error: '+err.message});
+  });
+
+  expressServer.httpServer = http.createServer(expressServer.app);
+  expressServer.httpServer.listen(serverPort);
+
+  console.log('Listening on port '+serverPort);
 }
 
 export function run(params : Parameters) {
@@ -36,39 +82,18 @@ export function run(params : Parameters) {
     contextPath: params.contextPath || '/sofp'
   });
 
-  const app = express();
+  // Whether we create and start the server in this run() function or not
+  const startServer = !params.expressServer;
 
-  if (params.accessLogPath) {
-      var accessLogStream;
-      if (params.accessLogPath !== '-') {
-        console.log('Writing access log to', params.accessLogPath, '(rotate daily)')
-        accessLogStream = RotatingFileStream(path.basename(params.accessLogPath), {
-          interval: '1d', // rotate daily
-          path: path.dirname(params.accessLogPath)
-        });
-      }
-      app.use(morgan('combined', { stream: accessLogStream }));
+  const expressServer = startServer ? createExpressServer(params.accessLogPath) : params.expressServer;
+
+  api.connectExpress(expressServer.app);
+
+  if (startServer) {
+    startExpressServer(expressServer, params.serverPort);
+    console.log('Try visiting http://localhost:'+params.serverPort+api.contextPath);
   }
 
-  // Pretty-print
-  app.set('json spaces', 2);
-
-  api.connectExpress(app);
-
-
-  app.use((req, res) => {
-      res.status(404).json({message: 'Not found'});
-  });
-
-  app.use((err, req, res, next) => {
-      console.error(err);
-      res.status(500).json({message: 'Internal error: '+err.message});
-  });
-
-  const httpServer = http.createServer(app);
-  httpServer.listen(params.serverPort);
-
-  console.log('Listening on port '+params.serverPort);
   console.log('Active backends ('+server.backends.length+') and their collections:');
   _.each(server.backends, (backend) => {
       console.log('  - '+backend.name);
@@ -76,5 +101,5 @@ export function run(params : Parameters) {
           console.log('     |- '+collection.id);
       });
   });
-  console.log('Try visiting http://localhost:'+params.serverPort+api.contextPath);
+  
 }
