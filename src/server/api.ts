@@ -585,6 +585,7 @@ export class API {
             queryString = _.filter(_.flatten(queryString), s => s !== '');
 
             queryString.push('limit=' + params.itemQuery.limit);
+
             var nextTokenIndex;
             if (params.itemQuery.nextToken) {
                 queryString.push('nextToken='+encodeURIComponent(params.itemQuery.nextToken));
@@ -615,33 +616,46 @@ export class API {
             res.write('\t\t"title":"This document"\n');
             res.write('\t}');
 
+            var nextNextTokenPromise = null;
+
             if (stream.lastPushedItem && stream.lastPushedItem.nextToken !== undefined && stream.lastPushedItem.nextToken !== null) {
-                if (nextTokenIndex === undefined) {
-                    nextTokenIndex = queryString.length;
-                }
-                queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(stream.lastPushedItem.nextToken);
-                var nextUri = params.baseUrl + '/collections/' + params.collection.id + '/items?' +
-                    queryString.join('&');
-
-                res.write(',{\n');
-                res.write('\t\t"href": '+JSON.stringify(nextUri)+',\n');
-                res.write('\t\t"rel": "next",\n');
-                res.write('\t\t"type":"application/geo+json",\n');
-                res.write('\t\t"title":"Next results"\n');
-                res.write('\t}');
-
-                res.write(',{\n');
-                res.write('\t\t"href": '+JSON.stringify(nextUri+'&f=html')+',\n');
-                res.write('\t\t"rel": "next",\n');
-                res.write('\t\t"type":"text/html",\n');
-                res.write('\t\t"title":"Next results"\n');
-                res.write('\t}');
+                nextNextTokenPromise = stream.lastPushedItem.nextToken;
             }
 
-            res.write('],\n');
-            res.write('\t"numberReturned": '+n+'\n');
-            res.write('}\n');
-            res.end();
+            if (_.isFunction(nextNextTokenPromise)) {
+                nextNextTokenPromise = nextNextTokenPromise();
+            }
+
+            Promise.resolve(nextNextTokenPromise).then(nextNextToken => {
+                if (nextNextToken) {
+                    if (nextTokenIndex === undefined) {
+                        nextTokenIndex = queryString.length;
+                    }
+                    queryString[nextTokenIndex] = 'nextToken='+encodeURIComponent(nextNextToken);
+                    var nextUri = params.baseUrl + '/collections/' + params.collection.id + '/items?' +
+                        queryString.join('&');
+
+                    res.write(',{\n');
+                    res.write('\t\t"href": '+JSON.stringify(nextUri)+',\n');
+                    res.write('\t\t"rel": "next",\n');
+                    res.write('\t\t"type":"application/geo+json",\n');
+                    res.write('\t\t"title":"Next results"\n');
+                    res.write('\t}');
+
+                    res.write(',{\n');
+                    res.write('\t\t"href": '+JSON.stringify(nextUri+'&f=html')+',\n');
+                    res.write('\t\t"rel": "next",\n');
+                    res.write('\t\t"type":"text/html",\n');
+                    res.write('\t\t"title":"Next results"\n');
+                    res.write('\t}');
+                }
+
+                res.write('],\n');
+                res.write('\t"numberReturned": '+n+'\n');
+                res.write('}\n');
+                res.end();
+            });
+
         }
     }
 };
