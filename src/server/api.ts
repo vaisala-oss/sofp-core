@@ -201,7 +201,7 @@ export class API {
                 if (!f) {
                     return next();
                 }
-                if (authorizer && !authorizer.accept(f.feature)) {
+                if (authorizer && !authorizer.accept(f)) {
                     return next();
                 }
                 f = this.resolveFeature(f, params);
