@@ -6,6 +6,7 @@
 	"author": "Vaisala Corporation",
 	"license": "MIT",
 	"main": "dist/server/index.js",
+	"types": "src/index.ts",
 	"engines": {
 		"node": "^8.11.4"
 	},
