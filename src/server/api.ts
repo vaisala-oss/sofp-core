@@ -207,12 +207,12 @@ export class API {
                 f = this.resolveFeature(f, params);
                 var tmp = _.extend({}, f, {
                     links: [{
-                        href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=json`,
+                        href: `${params.baseUrl}/collections/${collection.id}/items/${req.params.itemId}?f=json`,
                         rel: 'self',
                         type: 'application/geo+json',
                         title: 'Link to this feature in JSON format'
                     },{
-                        href: `${params.baseUrl}/collections/${collection.id}/items/${f.id}?f=html`,
+                        href: `${params.baseUrl}/collections/${collection.id}/items/${req.params.itemId}?f=html`,
                         rel: 'alternate',
                         type: 'text/html',
                         title: 'Link to this feature in HTML format'
