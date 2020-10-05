@@ -101,5 +101,4 @@ export function run(params : Parameters) {
           console.log('     |- '+collection.id);
       });
   });
-  
 }

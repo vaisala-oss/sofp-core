@@ -583,7 +583,6 @@ export class API {
 
             var queryString = _.map(params.itemQuery.filters, f => _.map(f.query, (v,k) => encodeURIComponent(k) + '=' + encodeURIComponent(v)));
             queryString = _.filter(_.flatten(queryString), s => s !== '');
-
             queryString.push('limit=' + params.itemQuery.limit);
 
             var nextTokenIndex;

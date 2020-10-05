@@ -41,3 +41,14 @@ To start the local image (removing the container when stopped):
 ## CI
 
 This project is using Semaphore CI: https://semaphoreci.com/sampov2/sofp-core-2
+
+## OGC API Features Validation
+
+API Features validation can be checked using the OGC Team Engine
+
+1. When you have SOFP running, start the team engine test suite in docker: `docker run --network=host ogccite/ets-ogcapi-features10`
+2. Access the team engine via a browser http://localhost:8081/teamengine/
+3. Log in to teamengine (login `ogctest`/`ogctest`)
+4. Create new test session, select: organisation = OGC, specification = OGC API - Features 1.0, click "start new test session"
+5. Enter location of landing page (for example http://localhost:3000/sofp)
+6. Click "start"
