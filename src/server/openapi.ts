@@ -191,22 +191,19 @@ export class OpenAPI {
                     },
                     collectionInfo: {
                         type: 'object',
-                        required: [ 'name', 'links' ],
+                        required: [ 'id', 'links' ],
                         properties: {
-                            name: {
+                            id: {
                                 description: 'identifier of the collection used, for example, in URIs',
-                                type: 'string',
-                                example: 'buildings'
+                                type: 'string'
                             },
                             title: {
                                 description: 'human readable title of the collection',
-                                type: 'string',
-                                example: 'Buildings'
+                                type: 'string'
                             },
                             description: {
                                 description: 'a description of the features in the collection',
-                                type: 'string',
-                                example: 'Buildings in the city of Bonn.'
+                                type: 'string'
                             },
                             links: {
                                 type: 'array',
@@ -363,7 +360,7 @@ export class OpenAPI {
                     operationId: operationId_describeCollection,
                     tags: [ 'Capabilities' ],
                     responses: {
-                        '200': formulateResponse('metadata about the '+collection.id+' collection shared by this API', '#/components/schemas/collectionInfo'),
+                        '200': formulateResponse('metadata about the '+collection.id+' collection', '#/components/schemas/collectionInfo'),
                         default: formulateResponse('an error occurred', '#/components/schemas/exception')
                     }
                 }
