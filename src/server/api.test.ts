@@ -97,7 +97,7 @@ test('Server collection response should only include API fields, not "private" f
     let c = response.collections[0];
     expect(c.id).toBe('foo');
     expect(c.title).toBe('blaa');
-    expect(c.xxx).toBeUndefined();
+    expect(c['xxx']).toBeUndefined();
 });
 
 

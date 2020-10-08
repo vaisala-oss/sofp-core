@@ -1,12 +1,23 @@
 import {BBOXFilterProvider} from './bbox_filter';
+import {Collection, Query, Feature, FeatureStream} from 'sofp-lib';
 
 import * as express from 'express';
 
 const provider = new BBOXFilterProvider();
 
+function mockCollection() : Collection {
+    return {
+        id: 'mock',
+        links: [],
+        properties: [],
+        executeQuery: function(query : Query) : FeatureStream { throw new Error('fail'); },
+        getFeatureById: function(id : string) : Promise<Feature> {  throw new Error('fail'); }
+    };
+}
+
 test('Parse 2d bbox', () => {
     let req : unknown = { query: { bbox: '1,2,3,4' }};
-    let filter = provider.parseFilter(<express.Request>req, {});
+    let filter = provider.parseFilter(<express.Request>req, mockCollection());
     expect(filter.parameters.coords.length).toBe(4);
     expect(filter.parameters.coords[0]).toBe(1);
     expect(filter.parameters.coords[1]).toBe(2);
@@ -31,7 +42,7 @@ test('Parse 3d bbox', () => {
 test('Illegal box (3 coords)', () => {
     let req : unknown = { query: { bbox: '1,2,3' }};
     try {
-        let filter = provider.parseFilter(<express.Request>req, {});
+        let filter = provider.parseFilter(<express.Request>req, mockCollection());
         fail('Provider should have thrown an error');
     } catch(e) {
         // NOP
@@ -41,7 +52,7 @@ test('Illegal box (3 coords)', () => {
 test('Illegal 2d bbox (no characters)', () => {
     let req : unknown = { query: { bbox: '1,2,,4' }};
     try {
-        let filter = provider.parseFilter(<express.Request>req, {});
+        let filter = provider.parseFilter(<express.Request>req, mockCollection());
         fail('Provider should have thrown an error');
     } catch(e) {
         // NOP
@@ -51,7 +62,7 @@ test('Illegal 2d bbox (no characters)', () => {
 test('Illegal 2d bbox (text)', () => {
     let req : unknown = { query: { bbox: '1,2,x,4' }};
     try {
-        let filter = provider.parseFilter(<express.Request>req, {});
+        let filter = provider.parseFilter(<express.Request>req, mockCollection());
         fail('Provider should have thrown an error');
     } catch(e) {
         // NOP
@@ -61,7 +72,7 @@ test('Illegal 2d bbox (text)', () => {
 test('Illegal 2d bbox (text+numbers)', () => {
     let req : unknown = { query: { bbox: '1,2,x3,4' }};
     try {
-        let filter = provider.parseFilter(<express.Request>req, {});
+        let filter = provider.parseFilter(<express.Request>req, mockCollection());
         fail('Provider should have thrown an error');
     } catch(e) {
         // NOP
@@ -71,7 +82,7 @@ test('Illegal 2d bbox (text+numbers)', () => {
 test('Illegal 2d bbox (numbers+text)', () => {
     let req : unknown = { query: { bbox: '1,2,3x,4' }};
     try {
-        let filter = provider.parseFilter(<express.Request>req, {});
+        let filter = provider.parseFilter(<express.Request>req, mockCollection());
         fail('Provider should have thrown an error');
     } catch(e) {
         // NOP
@@ -81,7 +92,7 @@ test('Illegal 2d bbox (numbers+text)', () => {
 
 test('Polygon within bbox', () => {
     let req : unknown = { query: { bbox: '1,1,2,2' }};
-    let filter = provider.parseFilter(<express.Request>req, {});
+    let filter = provider.parseFilter(<express.Request>req, mockCollection());
 
     let point = {
         type: 'Feature',
@@ -98,7 +109,7 @@ test('Polygon within bbox', () => {
 
 test('Polygon outside bbox', () => {
     let req : unknown = { query: { bbox: '1,1,2,2' }};
-    let filter = provider.parseFilter(<express.Request>req, {});
+    let filter = provider.parseFilter(<express.Request>req, mockCollection());
 
     let point = {
         type: 'Feature',

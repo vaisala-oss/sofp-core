@@ -1,6 +1,6 @@
 import {Server} from './server';
 import {FilterProvider} from './filter_provider';
-import {Authorizer, Collection, FeatureStream, Filter, Item, Link, PropertyReference, Query} from 'sofp-lib';
+import {Authorizer, Collection, FeatureStream, Feature, Filter, Item, Link, PropertyReference, Query} from 'sofp-lib';
 
 import { OpenAPI } from './openapi';
 
@@ -273,7 +273,7 @@ export class API {
 
                 const query : Query = {
                     limit:     req.query.limit ? Number(req.query.limit) : 10,
-                    nextToken: req.query.nextToken  ? req.query.nextToken : undefined,
+                    nextToken: req.query.nextToken ? (_.isArray(req.query.nextToken) ? req.query.nextToken[0] : req.query.nextToken as string) : undefined,
                     filters: filters
                 };
 
@@ -482,7 +482,7 @@ export class API {
         };
     }
 
-    resolveFeature(feature, params : RequestParameters) {
+    resolveFeature(feature : Feature, params : RequestParameters) : Feature {
         return produce(feature, (feature) => {
             _.each(feature.properties, (v, k) => {
                 if (v instanceof PropertyReference) {
@@ -498,7 +498,7 @@ export class API {
                         console.error('ERROR! Backend supplied PropertyReference with no id');
                         return;
                     }
-                    var collectionId = v.collection.id || v.collection;
+                    var collectionId = (typeof v.collection === 'string') ? v.collection : v.collection.id;
                     feature.properties[k] = `${params.baseUrl}/collections/${collectionId}/items/${v.id}`;
                 }
             });

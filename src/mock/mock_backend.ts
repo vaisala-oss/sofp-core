@@ -1,4 +1,4 @@
-import {Backend, Collection, Link, Query, FeatureStream, Feature} from 'sofp-lib';
+import {Backend, Collection, Link, Property, Query, FeatureStream, Feature} from 'sofp-lib';
 
 let MockBackend = new Backend('MockBackend');
 
@@ -13,12 +13,17 @@ class FooCollection implements Collection {
         hreflang: 'en',
         title:    'Spatineo Website'
     }];
+    properties : Property[] = [];
 
     executeQuery(query : Query) : FeatureStream {
         var ret = new FeatureStream();
         ret.remainingFilter = query.filters;
         ret.push(null);
         return ret;
+    }
+
+    getFeatureById(id : string) {
+        return null;
     }
 };
 

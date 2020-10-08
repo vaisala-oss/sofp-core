@@ -1,17 +1,16 @@
-import {Backend, Collection, Query} from 'sofp-lib';
+import {Backend, Collection, Query, FeatureStream, Feature} from 'sofp-lib';
 import {Server} from './server';
 
 class MockCollection implements Collection {
     
     id : string;
-    /*
     links = [];
     properties = [];
     
-    executeQuery(query : Query) : FeatureStream;
+    executeQuery(query : Query) : FeatureStream { throw new Error('fail'); };
 
-    getFeatureById(id : string) : Promise<Feature>;
-    */
+    getFeatureById(id : string) : Promise<Feature> { throw new Error('fail'); };
+
     constructor(id : string) {
         this.id = id;
     }
@@ -36,11 +35,8 @@ test('Single-backend server returns single collection', () => {
 
     let collections = server.getCollections();
 
-    expect(collections).toEqual([
-        {
-            id: 'Foo'
-        }
-    ]);
+    expect(collections.length).toEqual(1);
+    expect(collections[0].id).toEqual('Foo');
 });
 
 test('Multi-backend server returns all collections', () => {
@@ -57,11 +53,10 @@ test('Multi-backend server returns all collections', () => {
 
     let collections = server.getCollections();
 
-    expect(collections).toEqual([
-        { id: 'Foo1' },
-        { id: 'Foo2' },
-        { id: 'Bar' }
-    ]);
+    expect(collections.length).toEqual(3);
+    expect(collections[0].id).toEqual('Foo1');
+    expect(collections[1].id).toEqual('Foo2');
+    expect(collections[2].id).toEqual('Bar');
 });
 
 test('Find collection by id', () => {

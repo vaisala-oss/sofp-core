@@ -1,4 +1,4 @@
-import {Backend, AuthorizerProvider, Collection, FeatureCursor, Filter, Query} from 'sofp-lib';
+import {Backend, AuthorizerProvider, Collection, Filter, Query} from 'sofp-lib';
 import * as _ from 'lodash';
 
 /**
