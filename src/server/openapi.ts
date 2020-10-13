@@ -295,12 +295,13 @@ export class OpenAPI {
             }]
         };
 
-        function formulateResponse(description, jsonSchema) {
+        function formulateResponse(description, jsonSchema, exampleResponse?) {
             return {
                 description: description,
                 content: {
                     'application/json': {
-                        schema: { '$ref': jsonSchema }
+                        schema: { '$ref': jsonSchema },
+                        example: exampleResponse
                     }
                 }
             };
@@ -355,7 +356,7 @@ export class OpenAPI {
 
             ret.paths['/collections/'+collection.id] = {
                 get: {
-                    summary: 'describe the buildings feature collection',
+                    summary: `describe the ${collection.title} feature collection`,
                     description: collection.description,
                     operationId: operationId_describeCollection,
                     tags: [ 'Capabilities' ],
@@ -415,9 +416,27 @@ export class OpenAPI {
                 if (_.size(p.exampleValues) > 0) {
                     prop.schema.example = p.exampleValues[0];
                 }
-                
                 parameters.push(prop);
             });
+
+            var exampleItemsResponse;
+            var exampleItemResponse;
+            if (collection.exampleFeature) {
+                exampleItemResponse = _.extend({ "type": "Feature" }, collection.exampleFeature);
+                exampleItemsResponse = {
+                    "type": "FeatureCollection",
+                    "features": [ exampleItemResponse ],
+                    "links": [{
+                        "href": `${this.requestParameters.baseUrl}/collection/${collection.id}/items`,
+                        "rel": "self",
+                        "type": "application/geo+json"
+                    }],
+                    "timeStamp": new Date().toISOString(),
+                    "numberMatched": 1,
+                    "numberReturned": 1
+                };
+
+            }
 
             ret.paths['/collections/'+collection.id+'/items'] = {
                 get: {
@@ -429,7 +448,7 @@ export class OpenAPI {
                     parameters: parameters,
                     responses: {
                         '200': formulateResponse('Information about the feature collection plus the first features matching the selection parameters.', 
-                            '#/components/schemas/' + featureCollectionSchemaName),
+                            '#/components/schemas/' + featureCollectionSchemaName, exampleItemsResponse),
                         default: formulateResponse('an error occurred', '#/components/schemas/exception')
                     }
                 }
@@ -444,7 +463,7 @@ export class OpenAPI {
                         '$ref': '#/components/parameters/featureId'
                     }],
                     responses: {
-                        '200': formulateResponse('A feature', '#/components/schemas/' + featureSchemaName),
+                        '200': formulateResponse('A feature', '#/components/schemas/' + featureSchemaName, exampleItemResponse),
                         default: formulateResponse('an error occurred', '#/components/schemas/exception')
                     }
                 }

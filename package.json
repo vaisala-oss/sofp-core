@@ -37,7 +37,7 @@
 		"morgan": "^1.10.0",
 		"rotating-file-stream": "^1.4.6",
 		"shins": "^2.6.0",
-		"sofp-lib": "^0.6.0",
+		"sofp-lib": "^0.6.2",
 		"widdershins": "^4.0.1"
 	},
 	"devDependencies": {
