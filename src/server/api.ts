@@ -499,7 +499,13 @@ export class API {
                         return;
                     }
                     var collectionId = (typeof v.collection === 'string') ? v.collection : v.collection.id;
-                    feature.properties[k] = `${params.baseUrl}/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(v.id)}`;
+                    var baseUrl = params.baseUrl;
+                    // If PropertyReference has a basePath, replace basePath in baseUrl
+                    if (v.basePath) {
+                        baseUrl = baseUrl.substring(0, baseUrl.length-params.basePath.length) + v.basePath;
+                    }
+
+                    feature.properties[k] = `${baseUrl}/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(v.id)}`;
                 }
             });
         });
