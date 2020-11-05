@@ -499,7 +499,7 @@ export class API {
                         return;
                     }
                     var collectionId = (typeof v.collection === 'string') ? v.collection : v.collection.id;
-                    feature.properties[k] = `${params.baseUrl}/collections/${collectionId}/items/${v.id}`;
+                    feature.properties[k] = `${params.baseUrl}/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(v.id)}`;
                 }
             });
         });

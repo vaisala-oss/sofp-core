@@ -1,7 +1,7 @@
 {
 	"name": "sofp-core",
 	"description": "SOFP is a lightweight OGC API Features server. It was originally developed for meteorological data and prototyping observation features data models.",
-	"version": "0.7.2",
+	"version": "0.7.3",
 	"homepage": "https://github.com/vaisala-oss/sofp-core",
 	"author": "Vaisala Corporation",
 	"license": "MIT",
