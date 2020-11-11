@@ -483,31 +483,56 @@ export class API {
     }
 
     resolveFeature(feature : Feature, params : RequestParameters) : Feature {
-        return produce(feature, (feature) => {
-            _.each(feature.properties, (v, k) => {
-                if (v instanceof PropertyReference) {
-                    if (v.type !== 'Feature') {
-                        console.error(`ERROR! Backend supplied PropertyReference of type ${v.type} that core does not understand`);
-                        return;
-                    }
-                    if (!v.collection) {
-                        console.error('ERROR! Backend supplied PropertyReference with no collection');
-                        return;
-                    }
-                    if (!v.id) {
-                        console.error('ERROR! Backend supplied PropertyReference with no id');
-                        return;
-                    }
-                    var collectionId = (typeof v.collection === 'string') ? v.collection : v.collection.id;
-                    var baseUrl = params.baseUrl;
-                    // If PropertyReference has a basePath, replace basePath in baseUrl
-                    if (v.basePath) {
-                        baseUrl = baseUrl.substring(0, baseUrl.length-params.basePath.length) + v.basePath;
-                    }
+        function resolveLink(v : PropertyReference) {
+            if (v.type !== 'Feature') {
+                console.error(`ERROR! Backend supplied PropertyReference of type ${v.type} that core does not understand`);
+                return;
+            }
+            if (!v.collection) {
+                console.error('ERROR! Backend supplied PropertyReference with no collection');
+                return;
+            }
+            if (!v.id) {
+                console.error('ERROR! Backend supplied PropertyReference with no id');
+                return;
+            }
+            var collectionId = (typeof v.collection === 'string') ? v.collection : v.collection.id;
+            var baseUrl = params.baseUrl;
+            // If PropertyReference has a basePath, replace basePath in baseUrl
+            if (v.basePath) {
+                baseUrl = baseUrl.substring(0, baseUrl.length-params.basePath.length) + v.basePath;
+            }
 
-                    feature.properties[k] = `${baseUrl}/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(v.id)}`;
-                }
-            });
+            return `${baseUrl}/collections/${encodeURIComponent(collectionId)}/items/${encodeURIComponent(v.id)}`;
+        }
+        return produce(feature, (feature) => {
+            function produceLinks(path, dict) {
+                _.forOwn(dict, (v, k) => {
+                    if (v instanceof PropertyReference) {
+                        var value = resolveLink(v);
+                        //console.log('found link at',path + '.' + k + ' = '+value);
+                        if (value) {
+                            dict[k] = value;
+                        }
+                    } else if (_.isObject(v)) {
+                        produceLinks(path + '.' + k, v);
+                    } else if (_.isArray(v)) {
+                        _.each(v, (d,i) => {
+                            if (d instanceof PropertyReference) {
+
+                                var value = resolveLink(d);
+                                //console.log('found link at',path + '.' + k + '[' + i + '] = '+value);
+                                if (value) {
+                                    v[i] = value;
+                                }
+                            } else if (_.isObject(d)) {
+                                produceLinks(path + '.' + k + '[' + i + ']', d);
+                            }
+                        });
+                    }
+                });
+            }
+            produceLinks('', feature.properties);
         });
     }
 
