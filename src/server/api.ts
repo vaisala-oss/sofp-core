@@ -228,6 +228,9 @@ export class API {
                 json = json.replace(/^\t/gm, '\t\t');
                 json = json.substring(0,json.length-1)+'\t}';
 
+                res.writeHead(200, {
+                    'Content-Type': 'application/geo+json',
+                    'Access-Control-Allow-Origin': '*' });
                 res.write(json);
                 res.end();
             }).catch(next); // NOTE: if user is unauthorized, it will appear as a 404
