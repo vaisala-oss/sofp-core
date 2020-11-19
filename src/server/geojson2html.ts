@@ -40,7 +40,7 @@ export class geojson2html {
         const data = JSON.parse(this.jsonString.join(''));
         
         const options = {};
-        if (data.collection) {
+        if (this.collection) {
             options['title'] = 'Data' + (this.collection.id ? ' from collection "'+this.collection.id+'"' : '');
         } else if (data.id) {
             options['title'] = 'Feature ' + data.id;
