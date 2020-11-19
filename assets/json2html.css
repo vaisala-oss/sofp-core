@@ -476,3 +476,5 @@ textarea{font-family:monospace; margin-bottom: 3em;}
 #jsonContainer .string  { color: #191; }
 #jsonContainer .number  { color: #911; }
 #jsonContainer .boolean { color: #119; }
+
+h3 { padding-top: 1em; }
