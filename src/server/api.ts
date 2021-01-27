@@ -126,9 +126,14 @@ export class API {
     }
 
     connectExpress(app: express.Application) : void {
+        function getHeaderAsString(req, header) : string {
+            return req.headers[header];
+        }
+
         let produceRequestParameters = (req: express.Request) : RequestParameters => {
             let protocol = req.headers['x-forwarded-proto'] || req.protocol;
-            let host = req.headers['x-forwarded-host'];
+
+            let host : string = getHeaderAsString(req, 'x-forwarded-host');
             if (host) {
                 if (req.headers['x-forwarded-port']) {
                     if (host.indexOf(':') !== -1) {
