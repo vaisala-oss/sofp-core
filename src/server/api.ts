@@ -131,6 +131,9 @@ export class API {
             let host = req.headers['x-forwarded-host'];
             if (host) {
                 if (req.headers['x-forwarded-port']) {
+                    if (host.indexOf(':') !== -1) {
+                        host = host.substring(0, host.indexOf(':'));
+                    }
                     host += ':'+req.headers['x-forwarded-port'];
                 }
             } else {
