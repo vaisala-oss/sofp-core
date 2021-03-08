@@ -270,6 +270,10 @@ export class API {
                     }
                 }
 
+		if (req.query.limit !== undefined && req.query.limit > 10000) {
+                    return res.status(400).send('limit should not be greater than 10000');
+		}
+
                 // Check that property filters are in-line with schema (requirement /req/core/query-param-unknown)
                 var unprocessedParameters = {};
                 _.each(req.query, (v, k) => unprocessedParameters[k.toLowerCase()] = true);
