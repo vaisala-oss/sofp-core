@@ -487,6 +487,8 @@ export class API {
             }]
         });
 
+        _.each(collection.links, link => ret.links.push(link));
+
         return ret;
     }
 
