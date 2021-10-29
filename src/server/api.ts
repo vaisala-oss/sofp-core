@@ -423,7 +423,6 @@ export class API {
      * @link https://cdn.rawgit.com/opengeospatial/WFS_FES/3.0.0-draft.1/docs/17-069.html#_feature_collections_metadata
      */ 
     getFeatureCollectionsMetadata(params : RequestParameters) : APIResponse {
-        //var collections = _.map(this.server.getCollections(), c => { return { 'id': c.id, 'title': c.title, 'description': c.description, 'links': c.links, 'extent': c.extent, 'crs': c.crs }});
         var collections = _.map(this.server.getCollections(), this.collectionToResponse);
         collections = _.cloneDeep(collections);
 
