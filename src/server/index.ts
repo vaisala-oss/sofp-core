@@ -25,6 +25,7 @@ export interface Parameters {
   expressServer? : ExpressServer;
   serverPort? : number;
   accessLogPath? : string; // null/undefined for none, "-" for stdout, anything else is a path to the file
+  language? : string;
 
   contextPath : string;
   backends : Backend[];
@@ -73,6 +74,7 @@ export function startExpressServer(expressServer : ExpressServer, serverPort : n
 export function run(params : Parameters) {
   const server = new Server({
     backends: params.backends,
+    language: params.language,
     authorizerProvider: params.authorizerProvider
   });
 

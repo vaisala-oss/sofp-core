@@ -172,11 +172,18 @@ export class API {
 
         app.get(this.contextPath, (req, res) => {
             let response = this.getApiLandingPage(produceRequestParameters(req));
+            // This is for INSPIRE Good Practice requirement /req/multilinguality/content-language-root, but is of general use and therefore in core
+            if (this.server.language) {
+                res.header('Content-Language', this.server.language);
+            }
             sendResponse(req, res, response);
         });
 
         app.get(this.contextPath + 'collections', (req, res) => {
             let response = this.getFeatureCollectionsMetadata(produceRequestParameters(req));
+            this.server.backends.forEach(backend => {
+                backend.links.collections.forEach(link => response.links.push(link));
+            });
             sendResponse(req, res, response);
         });
 

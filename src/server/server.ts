@@ -6,12 +6,14 @@ import * as _ from 'lodash';
  **/
 export class Server {
     backends : Backend[];
+    language? : string;
     authorizerProvider : AuthorizerProvider;
 
-    constructor(params? : { backends? : Backend[], authorizerProvider? : AuthorizerProvider }) {
+    constructor(params? : { backends? : Backend[], authorizerProvider? : AuthorizerProvider, language?: string }) {
         params = params || {};
         this.backends = params.backends || [];
         this.authorizerProvider = params.authorizerProvider;
+        this.language = params.language;
     }
 
     getCollections() : Collection[] {
