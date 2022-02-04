@@ -373,9 +373,14 @@ export class API {
 	    'title': this.title,
 	    'description': this.description,
             links: [{
-                href: params.baseUrl + '/',
+                href: params.baseUrl + '/?f=json',
                 rel: 'self',
                 type: 'application/json',
+                title: this.title
+            },{
+                href: params.baseUrl + '/?f=html',
+                rel: 'self',
+                type: 'text/html',
                 title: this.title
             },{
                 href: params.baseUrl + '/api',
