@@ -38,7 +38,7 @@ test('Content specific tests for requirement 2: /req/core/root-success', () => {
     expect(linksByRel['conformance#application/json'].href).toBe('http://foo.com:1024/conformance');
 
     expect(linksByRel['data#application/json']).toBeDefined();
-    expect(linksByRel['data#application/json'].href).toBe('http://foo.com:1024/collections');
+    expect(linksByRel['data#application/json'].href).toBe('http://foo.com:1024/collections?f=json');
 });
 
 /**
