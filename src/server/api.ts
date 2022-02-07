@@ -403,7 +403,7 @@ export class API {
                 type: 'application/json',
                 title: 'OGC API Features conformance classes implemented by this server'
             },{
-                href: params.baseUrl + '/collections',
+                href: params.baseUrl + '/collections?f=json',
                 rel: 'data',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
