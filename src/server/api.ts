@@ -440,7 +440,7 @@ export class API {
 
         let ret : APIResponse = {
             links: [{
-                href: params.baseUrl + '/collections',
+                href: params.baseUrl + '/collections?f=json',
                 rel: 'self',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'

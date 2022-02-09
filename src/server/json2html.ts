@@ -48,13 +48,9 @@ function produceBody(title, data) {
         } ).join('');
     }
 
-    var selfLink;
     if (data.links) {
         ret += '<h2>Links</h2>';
         ret += _.map(data.links, l => {
-            if (l.rel === 'self') {
-                selfLink = l;
-            }
             return `<p>${l.rel} = <a href="${l.href}">${l.title || '(no title)'}</a> (${l.type})</p>`;
         } ).join('');
     }
@@ -67,14 +63,22 @@ function produceBody(title, data) {
 
     ret += '<h2>JSON output</h2>';
 
+    var selfLink = _.find(data.links, l => l.rel === 'self' && l.type === 'application/json')
+    if (!selfLink) {
+        // Attempt the alternate application/geo+json link (for items pages)
+        selfLink = _.find(data.links, l => l.rel === 'alternate' && l.type === 'application/geo+json')
+    }
+
     if (selfLink) {
-        var tmp = selfLink.href;
-        if (tmp.indexOf('?') === -1) {
-            tmp += '?f=json';
-        } else {
-            tmp += '&f=json';
+        var url = selfLink.href;
+        if (url.indexOf('f=json') === -1) {
+            if (url.indexOf('?') === -1) {
+                url += '?f=json';
+            } else {
+                url += '&f=json';
+            }
         }
-        ret += `<p>Get raw <a href="${tmp}">JSON</a></p>`;
+        ret += `<p>Get raw <a href="${url}">JSON</a></p>`;
     }
 
     ret += '<div id="jsonContainer"></div>';
