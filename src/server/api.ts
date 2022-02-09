@@ -374,12 +374,12 @@ export class API {
 	    'description': this.description,
             links: [{
                 href: params.baseUrl + '/?f=json',
-                rel: 'self',
+                rel: params.responseFormat === 'JSON' ? 'self' : 'alternate',
                 type: 'application/json',
                 title: this.title
             },{
                 href: params.baseUrl + '/?f=html',
-                rel: 'self',
+                rel: params.responseFormat === 'HTML' ? 'self' : 'alternate',
                 type: 'text/html',
                 title: this.title
             },{
@@ -441,12 +441,12 @@ export class API {
         let ret : APIResponse = {
             links: [{
                 href: params.baseUrl + '/collections?f=json',
-                rel: 'self',
+                rel: params.responseFormat === 'JSON' ? 'self' : 'alternate',
                 type: 'application/json',
                 title: 'Metadata about the feature collections'
             },{
                 href: params.baseUrl + '/collections?f=html',
-                rel: 'alternate',
+                rel: params.responseFormat === 'HTML' ? 'self' : 'alternate',
                 type: 'text/html',
                 title: 'Metadata about the feature collections'
             }],
@@ -473,16 +473,15 @@ export class API {
 
     getFeatureCollectionMetadata(params : RequestParameters, collection : Collection) : APIResponse {
         let ret : APIResponse = {};
-
         _.extend(ret, this.collectionToResponse(collection), {
             links: [{
-                href: params.baseUrl + `/collections/${collection.id}`,
-                rel: 'self',
+                href: params.baseUrl + `/collections/${collection.id}?f=json`,
+                rel: params.responseFormat === 'JSON' ? 'self' : 'alternate',
                 type: 'application/json',
                 title: 'Metadata about this feature collection'
             },{
                 href: params.baseUrl + `/collections/${collection.id}?f=html`,
-                rel: 'alternate',
+                rel: params.responseFormat === 'HTML' ? 'self' : 'alternate',
                 type: 'text/html',
                 title: 'Metadata about this feature collection'
             },{

@@ -63,10 +63,10 @@ function produceBody(title, data) {
 
     ret += '<h2>JSON output</h2>';
 
-    var selfLink = _.find(data.links, l => l.rel === 'self' && l.type === 'application/json')
+    var selfLink = _.find(data.links, l => (l.rel === 'self' || l.rel === 'alternate') && l.type === 'application/json')
     if (!selfLink) {
         // Attempt the alternate application/geo+json link (for items pages)
-        selfLink = _.find(data.links, l => l.rel === 'alternate' && l.type === 'application/geo+json')
+        selfLink = _.find(data.links, l => (l.rel === 'self' || l.rel === 'alternate') && l.type === 'application/geo+json')
     }
 
     if (selfLink) {

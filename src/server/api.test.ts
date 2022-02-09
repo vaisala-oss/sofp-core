@@ -59,13 +59,40 @@ test('Content specific tests for requirement 10: /req/core/fc-md-success', () =>
  * - a link to the response document in every other media type supported by the server (relation: alternate).
  * All links SHALL include the rel and type link parameters.
  **/
-test('Content specific tests for requirement 11: /req/core/fc-md-links', () => {
-let api = new API(new MockServer(), { contextPath: '' });
-    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024', basePath: '/' });
+test('Content specific tests for requirement 11: /req/core/fc-md-links (JSON)', () => {
+    let api = new API(new MockServer(), { contextPath: '' });
+    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024', basePath: '/', responseFormat: 'JSON' });
 
     let self = _.find(response.links, l => l.rel === 'self');
     expect(self).toBeDefined();
-    expect(self.href).toBe('http://foo.com:1024/collections')
+    expect(self.type).toBe('application/json');
+    expect(self.href).toBe('http://foo.com:1024/collections?f=json');
+
+    let alternate = _.find(response.links, l => l.rel === 'alternate');
+    expect(alternate).toBeDefined();
+    expect(alternate.type).toBe('text/html');
+    expect(alternate.href).toBe('http://foo.com:1024/collections?f=html');
+
+    // All links SHALL include the rel and type link parameters.
+    _.each(response.links, (link) => {
+        expect(link.rel).toBeDefined();
+        expect(link.type).toBeDefined();
+    });
+});
+
+test('Content specific tests for requirement 11: /req/core/fc-md-links (HTML)', () => {
+    let api = new API(new MockServer(), { contextPath: '' });
+    let response = api.getFeatureCollectionsMetadata({ baseUrl: 'http://foo.com:1024', basePath: '/', responseFormat: 'HTML' });
+
+    let self = _.find(response.links, l => l.rel === 'self');
+    expect(self).toBeDefined();
+    expect(self.type).toBe('text/html');
+    expect(self.href).toBe('http://foo.com:1024/collections?f=html')
+
+    let alternate = _.find(response.links, l => l.rel === 'alternate');
+    expect(alternate).toBeDefined();
+    expect(alternate.type).toBe('application/json');
+    expect(alternate.href).toBe('http://foo.com:1024/collections?f=json')
 
     // All links SHALL include the rel and type link parameters.
     _.each(response.links, (link) => {
