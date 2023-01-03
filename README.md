@@ -52,3 +52,4 @@ API Features validation can be checked using the OGC Team Engine
 4. Create new test session, select: organisation = OGC, specification = OGC API - Features 1.0, click "start new test session"
 5. Enter location of landing page (for example http://localhost:3000/sofp)
 6. Click "start"
+
